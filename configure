@@ -1,0 +1,5 @@
+echo "CC=g++" > Makefile.rules
+echo "FLAGS=-Wall -Wextra -Werror -pedantic -std=c++98" >> Makefile.rules
+echo 'SRC=network.cc perceptron.cc main.cc parser.cc' >> Makefile.rules
+echo 'OBJ=$(SRC:.cc=.o)' >> Makefile.rules
+echo "BIN=ann" >> Makefile.rules
