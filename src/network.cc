@@ -5,34 +5,30 @@ Network::Network ()
 {
 }
 
-Network::Network (neuralMap& first_layer, neuralMap& neural_map)
+Network::Network (std::vector<unsigned>& first_layer, neuralMap& neural_map)
   : inputs_ ()
 {
   // Inputs creation
-  neuralMap::iterator it_nm = first_layer.begin ();
-  unsigned pos = 0;
-  for (; it_nm != first_layer.end (); it_nm++)
+  std::vector<unsigned>::iterator it_fl = first_layer.begin ();
+  size_t nb_perceptrons = neural_map.size ();
+
+  for (size_t i = 0; i < nb_perceptrons; i++)
+    perceptrons_.push_back (new Perceptron (i));
+
+  for (; it_fl != first_layer.end (); it_fl++)
   {
-    Perceptron* input_perceptron = new Perceptron ();
-    inputs_.push_back (input (0., input_perceptron, 0.));
-    build_perceptron_ (neural_map, pos, input_perceptron);
-    pos++;
+    inputs_.push_back (input (0., perceptrons_[*it_fl], 0.));
+    build_perceptron_ (neural_map, *it_fl, perceptrons_[*it_fl]);
   }
 }
 
-// trigger sweeping-destruction of the neurons (from inputs to outputs)
 Network::~Network ()
 {
-  /*
-  std::vector<cell>::iterator it = inputs_->begin ();
+  std::vector<Perceptron*>::iterator it = perceptrons_.begin ();
 
-  for (; it != inputs_.end (); it++)
-  {
-    delete *it->get_receiver;
+  for (; it != perceptrons_.end (); it++)
     delete *it;
-  }
-  inputs_.clear ();
-  */
+  perceptrons_.clear ();
 }
 
 // recursive perceptron building (deep-first traversal of the neural map)
@@ -46,11 +42,11 @@ void Network::build_perceptron_ (neuralMap& neural_map,
     std::vector<unsigned>::iterator it = cur_cell->begin ();
     for (; it != cur_cell->end (); it++)
     {
-      Perceptron* new_perceptron = new Perceptron ();
-      cur->connect_to (*new_perceptron);
+      Perceptron* cur_p = perceptrons_[*it];
+      cur->connect_to (*cur_p);
       // Marking the cell
       neural_map[cur_idx] = 0;
-      build_perceptron_ (neural_map, *it, new_perceptron);
+      build_perceptron_ (neural_map, *it, cur_p);
     }
   }
   outputs_.push_back (output (cur, 0., 0.));
@@ -78,4 +74,11 @@ void Network::interpolate (double* outputs, const double* inputs)
   std::vector<output>::iterator out_it = outputs_.begin ();
   for (; out_it != outputs_.end(); out_it++, out_ptr++)
     (*out_ptr) = (*out_it).receiver_get ();
+}
+
+void Network::dotify (std::ofstream& fs)
+{
+  std::vector<Perceptron*>::iterator it = perceptrons_.begin ();
+  for (; it != perceptrons_.end (); it++)
+    (*it)->dotify (fs);
 }

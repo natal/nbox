@@ -51,8 +51,8 @@ void MapParser::parse_neuron (const char* line)
 
 void MapParser::parse_input (const char* line)
 {
+  first_layer_.push_back (neural_map_.size ());
   parse_neuron (line);
-  first_layer_.push_back (neural_map_.back ());
 }
 
 void MapParser::next_command_ (const char* line, size_t size)

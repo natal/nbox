@@ -27,7 +27,7 @@ class MapParser
 
   private:
     neuralMap neural_map_;
-    neuralMap first_layer_;
+    std::vector<unsigned> first_layer_;
     char to_lower_ (char c);
 
     typedef void (MapParser::*parse_mthd) (const char*);

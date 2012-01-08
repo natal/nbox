@@ -7,6 +7,7 @@
 #ifndef CHANNEL_HH_
 # define CHANNEL_HH_
 # include <iostream>
+# include <fstream>
 
 template <typename S, typename R, typename M>
 class Channel
