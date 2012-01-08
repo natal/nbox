@@ -7,6 +7,7 @@
 #ifndef NETWORK_HH_
 # define NETWORK_HH_
 # include "perceptron.hh"
+# include "exceptions.hh"
 # include <fstream>
 
 typedef std::pair<size_t, size_t> cell;

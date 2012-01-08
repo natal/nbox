@@ -7,12 +7,18 @@ Perceptron::Perceptron (int idx)
 
 Perceptron::~Perceptron ()
 {
+
+  std::vector<axon*>::iterator out_it = outputs_.begin ();
+  for (; out_it != outputs_.end (); out_it++)
+    delete *out_it;
+  outputs_.clear ();
 }
 
-void Perceptron::connect_to (Perceptron& out)
+void Perceptron::connect_to (Perceptron* out)
 {
-  axon new_axon (this, &out, 0.);
-  out.inputs_.push_back (new_axon);
+  // double allocation for easy destruction
+  axon* new_axon = new axon (this, out, 0.);
+  out->inputs_.push_back (new_axon);
   outputs_.push_back (new_axon);
 }
 
@@ -23,21 +29,21 @@ int Perceptron::get_index ()
 
 void Perceptron::activate ()
 {
-  std::vector<axon>::iterator in_it = inputs_.begin ();
+  std::vector<axon*>::iterator in_it = inputs_.begin ();
 
   double sum = 0.;
   for (; in_it != inputs_.end (); in_it++)
   {
-    double msg = (*in_it).message_get ();
-    double weight = (*in_it).weight_get ();
+    double msg = (*in_it)->message_get ();
+    double weight = (*in_it)->weight_get ();
     sum += msg * weight;
   }
 
   // message transmission
-  std::vector<axon>::iterator out_it = outputs_.begin ();
+  std::vector<axon*>::iterator out_it = outputs_.begin ();
   double transfer_msg = transfer_func_ (sum);
   for (; out_it != outputs_.end (); out_it++)
-    (*out_it).message_set (transfer_msg);
+    (*out_it)->message_set (transfer_msg);
 }
 
 double Perceptron::transfer_func_ (double x)
@@ -47,12 +53,12 @@ double Perceptron::transfer_func_ (double x)
 
 void Perceptron::dotify (std::ofstream& fs)
 {
-  std::vector<axon>::iterator in_it = inputs_.begin ();
-  for (; in_it != inputs_.end (); in_it++)
+  std::vector<axon*>::iterator out_it = outputs_.begin ();
+  for (; out_it != outputs_.end (); out_it++)
   {
-    Perceptron* receiver = in_it->receiver_get ();
+    Perceptron* receiver = (*out_it)->receiver_get ();
     fs << "P" << index_ << " -> " << "P" << receiver->index_;
-    fs << " [label=" << in_it->weight_get () << "]";
+    fs << " [label=" << (*out_it)->weight_get () << "]";
     fs << std::endl;
   }
 }

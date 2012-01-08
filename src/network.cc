@@ -37,17 +37,15 @@ void Network::build_perceptron_ (neuralMap& neural_map,
                                  Perceptron* cur)
 {
   std::vector<unsigned>* cur_cell = neural_map[cur_idx];
-  if (cur_cell)
+  std::vector<unsigned>::iterator it = cur_cell->begin ();
+  for (; it != cur_cell->end (); it++)
   {
-    std::vector<unsigned>::iterator it = cur_cell->begin ();
-    for (; it != cur_cell->end (); it++)
-    {
-      Perceptron* cur_p = perceptrons_[*it];
-      cur->connect_to (*cur_p);
-      // Marking the cell
-      neural_map[cur_idx] = 0;
-      build_perceptron_ (neural_map, *it, cur_p);
-    }
+    if (*it >= perceptrons_.size ())
+      throw NoPerceptronException (*it);
+
+    Perceptron* cur_p = perceptrons_[*it];
+    cur->connect_to (cur_p);
+    build_perceptron_ (neural_map, *it, cur_p);
   }
   outputs_.push_back (output (cur, 0., 0.));
 }

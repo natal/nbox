@@ -1,4 +1,5 @@
 #include "network.hh"
+#include "exceptions.hh"
 #include "parser.hh"
 #include <fstream>
 #include <string>
@@ -11,6 +12,20 @@ int main (int argc, char** argv)
     return 1;
 
   MapParser parser;
-  parser.parse_file (argv[1]);
+  std::cout << "Test program" << std::endl;
+
+  try
+  {
+    parser.parse_file (argv[1]);
+    Network* network = parser.retrieve_network ();
+
+    std::ofstream fs;
+    fs.open ("nm.dot");
+    network->dotify (fs);
+  }
+  catch (std::exception ex)
+  {
+    std::cout << ex.what () << std::endl;
+  }
   return 0;
 }

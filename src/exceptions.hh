@@ -10,6 +10,8 @@
 # include <iostream>
 # include <cassert>
 # include <exception>
+# include <sstream>
+# include <string>
 
 class UnknownTokenException: std::exception
 {
@@ -18,6 +20,25 @@ class UnknownTokenException: std::exception
     {
       return "Lexical error: Unknown token";
     }
+};
+
+class NoPerceptronException: std::exception
+{
+  public:
+    NoPerceptronException (unsigned id)
+      : id_ (id)
+    {
+    }
+    virtual const char* what () const throw ()
+    {
+      std::stringstream st;
+      st << "Syntax error: Perceptron number ";
+      st << id_;
+      st << " does not exist.";
+      return st.str ().c_str ();
+    }
+  private:
+    unsigned id_;
 };
 
 #endif /* !EXCEPTIONS_HH_ */
