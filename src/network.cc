@@ -20,6 +20,10 @@ Network::Network (std::vector<unsigned>& first_layer, neuralMap& neural_map)
     inputs_.push_back (input (0., perceptrons_[*it_fl], 0.));
     build_perceptron_ (neural_map, *it_fl, perceptrons_[*it_fl]);
   }
+
+  std::vector<Perceptron*>::iterator it_pn = perceptrons_.begin ();
+  for (; it_pn != perceptrons_.end (); it_pn++)
+    (*it_pn)->unmark ();
 }
 
 Network::~Network ()
