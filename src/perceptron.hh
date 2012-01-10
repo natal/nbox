@@ -27,11 +27,16 @@ class Perceptron
     void activate ();
     void dotify (std::ofstream& fs);
     int get_index ();
+    bool is_marked ();
+    void mark ();
+    void unmark ();
+
   private:
     std::vector<axon*> inputs_;
     std::vector<axon*> outputs_;
     double transfer_func_ (double x);
     int index_;
+    bool marked_;
 };
 
 

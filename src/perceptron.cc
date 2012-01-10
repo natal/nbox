@@ -1,7 +1,7 @@
 #include "perceptron.hh"
 
 Perceptron::Perceptron (int idx)
-  : inputs_ (), outputs_ (), index_ (idx)
+  : inputs_ (), outputs_ (), index_ (idx), marked_ (false)
 {
 }
 
@@ -58,7 +58,22 @@ void Perceptron::dotify (std::ofstream& fs)
   {
     Perceptron* receiver = (*out_it)->receiver_get ();
     fs << "P" << index_ << " -> " << "P" << receiver->index_;
-    fs << " [label=" << (*out_it)->weight_get () << "]";
+    fs << " [label=" << (*out_it)->weight_get () << "];";
     fs << std::endl;
   }
+}
+
+bool Perceptron::is_marked ()
+{
+  return marked_;
+}
+
+void Perceptron::mark ()
+{
+  marked_ = true;
+}
+
+void Perceptron::unmark ()
+{
+  marked_ = false;
 }

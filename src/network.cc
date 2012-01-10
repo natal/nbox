@@ -38,16 +38,26 @@ void Network::build_perceptron_ (neuralMap& neural_map,
 {
   std::vector<unsigned>* cur_cell = neural_map[cur_idx];
   std::vector<unsigned>::iterator it = cur_cell->begin ();
+
+  if (!cur_cell->size ())
+  {
+    outputs_.push_back (output (cur, 0., 0.));
+    return;
+  }
+
   for (; it != cur_cell->end (); it++)
   {
     if (*it >= perceptrons_.size ())
       throw NoPerceptronException (*it);
 
-    Perceptron* cur_p = perceptrons_[*it];
-    cur->connect_to (cur_p);
-    build_perceptron_ (neural_map, *it, cur_p);
+    Perceptron* next = perceptrons_[*it];
+    cur->connect_to (next);
+    if (!next->is_marked ())
+    {
+      build_perceptron_ (neural_map, *it, next);
+      next->mark ();
+    }
   }
-  outputs_.push_back (output (cur, 0., 0.));
 }
 
 void Network::interpolate (double* outputs, const double* inputs)

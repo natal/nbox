@@ -21,9 +21,12 @@ int main (int argc, char** argv)
 
     std::ofstream fs;
     fs.open ("nm.dot");
+    fs << "digraph \"neural map\"" << std::endl;
+    fs << "{" << std::endl;
     network->dotify (fs);
+    fs << "}" << std::endl;
   }
-  catch (std::exception ex)
+  catch (NoPerceptronException ex)
   {
     std::cout << ex.what () << std::endl;
   }
