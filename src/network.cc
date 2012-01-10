@@ -17,7 +17,7 @@ Network::Network (std::vector<unsigned>& first_layer, neuralMap& neural_map)
 
   for (; it_fl != first_layer.end (); it_fl++)
   {
-    inputs_.push_back (input (0., perceptrons_[*it_fl], 0.));
+    inputs_.push_back (perceptrons_[*it_fl]);
     build_perceptron_ (neural_map, *it_fl, perceptrons_[*it_fl]);
   }
 
@@ -45,7 +45,7 @@ void Network::build_perceptron_ (neuralMap& neural_map,
 
   if (!cur_cell->size ())
   {
-    outputs_.push_back (output (cur, 0., 0.));
+    outputs_.push_back (cur);
     return;
   }
 
@@ -67,25 +67,21 @@ void Network::build_perceptron_ (neuralMap& neural_map,
 void Network::interpolate (double* outputs, const double* inputs)
 {
   const double* in_ptr = inputs;
-  std::vector<input>::iterator in_it = inputs_.begin ();
-
-  // setting inputs
-  for (; in_it != inputs_.end (); in_it++, in_ptr++)
-    (*in_it).message_set (*in_ptr);
+  std::vector<Perceptron*>::iterator in_it = inputs_.begin ();
 
   /************** SMART STUFF HAPPENS HERE *****************************************/
   /**/                                                                           /**/
   /*    Neuron activation : triggers a chain message transmition reaction          */
   /**/ for (in_it = inputs_.begin (); in_it != inputs_.end (); in_it++, in_ptr++)/**/
-  /**/   (*in_it).receiver_get ()->activate ();                                 /**/
+  /**/   (*in_it)->activate (*in_ptr);                                           /**/
   /**/                                                                           /**/
   /*********************************************************************************/
 
   // collecting outputs
   double* out_ptr = outputs;
-  std::vector<output>::iterator out_it = outputs_.begin ();
+  std::vector<Perceptron*>::iterator out_it = outputs_.begin ();
   for (; out_it != outputs_.end(); out_it++, out_ptr++)
-    (*out_ptr) = (*out_it).receiver_get ();
+    (*out_ptr) = (*out_it)->measure_ap ();
 }
 
 void Network::dotify (std::ofstream& fs)

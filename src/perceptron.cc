@@ -1,7 +1,12 @@
 #include "perceptron.hh"
 
 Perceptron::Perceptron (int idx)
-  : inputs_ (), outputs_ (), index_ (idx), marked_ (false)
+  : inputs_ (),
+    outputs_ (),
+    action_potential_ (0.),
+    index_ (idx),
+    inputs_utd_ (0),
+    marked_ (false)
 {
 }
 
@@ -29,21 +34,45 @@ int Perceptron::get_index ()
 
 void Perceptron::activate ()
 {
-  std::vector<axon*>::iterator in_it = inputs_.begin ();
 
-  double sum = 0.;
-  for (; in_it != inputs_.end (); in_it++)
+  inputs_utd_++;
+  // Neuron will only activate if all inputs have been updated
+  if (inputs_utd_ >= inputs_.size ())
   {
-    double msg = (*in_it)->message_get ();
-    double weight = (*in_it)->weight_get ();
-    sum += msg * weight;
-  }
+    std::vector<axon*>::iterator in_it = inputs_.begin ();
 
-  // message transmission
+    // weighted sum computation
+    double sum = 0.;
+    for (; in_it != inputs_.end (); in_it++)
+    {
+      double msg = (*in_it)->message_get ();
+      double weight = (*in_it)->weight_get ();
+      sum += msg * weight;
+    }
+
+    // message transmission
+    std::vector<axon*>::iterator out_it = outputs_.begin ();
+    action_potential_ = transfer_func_ (sum);
+    for (; out_it != outputs_.end (); out_it++)
+    {
+      (*out_it)->message_set (action_potential_);
+      (*out_it)->receiver_get ()->activate ();
+    }
+
+    // Back to outdated state
+    inputs_utd_ = 0;
+  }
+}
+
+void Perceptron::activate (double input_val)
+{
+  action_potential_ = input_val;
   std::vector<axon*>::iterator out_it = outputs_.begin ();
-  double transfer_msg = transfer_func_ (sum);
   for (; out_it != outputs_.end (); out_it++)
-    (*out_it)->message_set (transfer_msg);
+  {
+    (*out_it)->message_set (input_val);
+    (*out_it)->receiver_get ()->activate ();
+  }
 }
 
 double Perceptron::transfer_func_ (double x)
@@ -76,4 +105,9 @@ void Perceptron::mark ()
 void Perceptron::unmark ()
 {
   marked_ = false;
+}
+
+double Perceptron::measure_ap ()
+{
+  return action_potential_;
 }

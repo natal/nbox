@@ -11,8 +11,6 @@
 # include <fstream>
 
 typedef std::pair<size_t, size_t> cell;
-typedef Channel<double, Perceptron*, double> input;
-typedef Channel<Perceptron*, double, double> output;
 typedef std::vector<std::vector<unsigned>*> neuralMap;
 
 class Network
@@ -30,8 +28,8 @@ class Network
 
   private:
     std::vector<Perceptron*> perceptrons_;
-    std::vector<input> inputs_;
-    std::vector<output> outputs_;
+    std::vector<Perceptron*> inputs_;
+    std::vector<Perceptron*> outputs_;
     void build_perceptron_ (neuralMap& neural_map,
                             unsigned next_idx,
                             Perceptron* cur);
