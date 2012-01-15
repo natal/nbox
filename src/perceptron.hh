@@ -25,9 +25,7 @@ class Perceptron
     // retrieve the neural message from the inputs, multiply by the weights and compute the
     // activation function. Pass the result down to the output neurons.
     void activate ();
-
     void activate (double input_val);
-
     void dotify (std::ofstream& fs);
     int get_index ();
 
@@ -39,11 +37,19 @@ class Perceptron
     // measure the action potential
     double measure_ap ();
 
+
+    // Backpropagation components - requires all neurons
+    // being unmarked
+    void propagate_err ();
+    void adjust_weights ();
+
   private:
     std::vector<axon*> inputs_;
     std::vector<axon*> outputs_;
     double transfer_func_ (double x);
+    double deriv_trans_func_ (double x);
     double action_potential_;
+    double local_err_;
     int index_;
     unsigned inputs_utd_;
     bool marked_;

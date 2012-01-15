@@ -4,6 +4,7 @@ Perceptron::Perceptron (int idx)
   : inputs_ (),
     outputs_ (),
     action_potential_ (0.),
+    local_err_ (0.),
     index_ (idx),
     inputs_utd_ (0),
     marked_ (false)
@@ -58,7 +59,6 @@ void Perceptron::activate ()
       (*out_it)->message_set (action_potential_);
       (*out_it)->receiver_get ()->activate ();
     }
-
     // Back to outdated state
     inputs_utd_ = 0;
   }
@@ -78,6 +78,13 @@ void Perceptron::activate (double input_val)
 double Perceptron::transfer_func_ (double x)
 {
   return 1. / (1. + exp (-x));
+}
+
+double deriv_trans_func_ (double x)
+{
+  double exp_x = exp (x);
+  double denom = (1. + exp_x) * (1. + exp_x);
+  return exp_x / denom;
 }
 
 void Perceptron::dotify (std::ofstream& fs)
@@ -110,4 +117,31 @@ void Perceptron::unmark ()
 double Perceptron::measure_ap ()
 {
   return action_potential_;
+}
+
+// Bckprogation components
+void Perceptron::propagate_err ()
+{
+  if (!marked_)
+  {
+    marked_ = true;
+    std::vector<axon*>::iterator out_it = outputs_.begin ();
+    local_err_ = 0.;
+    for (; out_it != outputs_.end (); out_it++)
+    {
+      Perceptron* next = (*out_it)->receiver_get ();
+      local_err_ += (*out_it)->weight_get () * next->local_err_;
+    }
+
+    std::vector<axon*>::iterator in_it = inputs_.begin ();
+    for (; in_it != inputs_.end (); in_it++)
+    {
+      Perceptron* prev = (*in_it)->sender_get ();
+      prev->propagate_err ();
+    }
+  }
+}
+
+void adjust_weights ()
+{
 }
