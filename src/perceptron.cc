@@ -1,11 +1,13 @@
 #include "perceptron.hh"
 
-Perceptron::Perceptron (int idx)
+Perceptron::Perceptron (int index, double learning_rate)
   : inputs_ (),
     outputs_ (),
     action_potential_ (0.),
+    activation_val_ (0.),
+    learning_rate_ (learning_rate),
     local_err_ (0.),
-    index_ (idx),
+    index_ (index),
     inputs_utd_ (0),
     marked_ (false)
 {
@@ -43,20 +45,20 @@ void Perceptron::activate ()
     std::vector<axon*>::iterator in_it = inputs_.begin ();
 
     // weighted sum computation
-    double sum = 0.;
+    action_potential_ = 0.;
     for (; in_it != inputs_.end (); in_it++)
     {
       double msg = (*in_it)->message_get ();
       double weight = (*in_it)->weight_get ();
-      sum += msg * weight;
+      action_potential_ += msg * weight;
     }
 
     // message transmission
     std::vector<axon*>::iterator out_it = outputs_.begin ();
-    action_potential_ = transfer_func_ (sum);
+    activation_val_ = transfer_func_ (action_potential_);
     for (; out_it != outputs_.end (); out_it++)
     {
-      (*out_it)->message_set (action_potential_);
+      (*out_it)->message_set (activation_val_);
       (*out_it)->receiver_get ()->activate ();
     }
     // Back to outdated state
@@ -66,7 +68,7 @@ void Perceptron::activate ()
 
 void Perceptron::activate (double input_val)
 {
-  action_potential_ = input_val;
+  activation_val_ = input_val;
   std::vector<axon*>::iterator out_it = outputs_.begin ();
   for (; out_it != outputs_.end (); out_it++)
   {
@@ -80,10 +82,11 @@ double Perceptron::transfer_func_ (double x)
   return 1. / (1. + exp (-x));
 }
 
-double deriv_trans_func_ (double x)
+double Perceptron::deriv_trans_func_ (double x)
 {
   double exp_x = exp (x);
-  double denom = (1. + exp_x) * (1. + exp_x);
+  double denom = (1. + exp_x);
+  denom *= denom;
   return exp_x / denom;
 }
 
@@ -114,12 +117,12 @@ void Perceptron::unmark ()
   marked_ = false;
 }
 
-double Perceptron::measure_ap ()
+double Perceptron::measure_av ()
 {
-  return action_potential_;
+  return activation_val_;
 }
 
-// Bckprogation components
+// Backprogation components
 void Perceptron::propagate_err ()
 {
   if (!marked_)
@@ -142,6 +145,25 @@ void Perceptron::propagate_err ()
   }
 }
 
-void adjust_weights ()
+void Perceptron::adjust_weights (std::queue<Perceptron*>& queue)
 {
+  std::vector<axon*>::iterator in_it = inputs_.begin ();
+  for (; in_it != inputs_.end (); in_it++)
+  {
+    double delta_weight = learning_rate_ * local_err_;
+    delta_weight *= deriv_trans_func_ (action_potential_);
+    delta_weight *= (*in_it)->receiver_get ()->activation_val_;
+    (*in_it)->weight_adjust (delta_weight) ;
+    Perceptron* receiver = (*in_it)->receiver_get ();
+    if (!receiver->marked_)
+    {
+      queue.push (receiver);
+      receiver->mark ();
+    }
+  }
+}
+
+void Perceptron::set_local_err (double err)
+{
+  local_err_ = err;
 }

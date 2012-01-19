@@ -51,4 +51,10 @@ double Channel<S, R, M>::weight_get ()
   return weight_;
 }
 
+template <typename S, typename R, typename M>
+void Channel<S, R, M>::weight_adjust (double delta)
+{
+  weight_ += delta;
+}
+
 #endif /* !CHANNEL_HH_ */

@@ -20,6 +20,7 @@ class Channel
     M message_get ();
     void message_set (M msg);
     double weight_get ();
+    void weight_adjust (double delta);
 
   private:
     S sender_;

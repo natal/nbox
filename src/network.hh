@@ -18,21 +18,30 @@ class Network
   public:
     Network ();
     Network (std::vector<unsigned>& first_layer, neuralMap& neural_map);
+    Network (std::vector<unsigned>& first_layer,
+             neuralMap& neural_map,
+             double learning_rate);
     ~Network ();
     // the size of both arrays must match the number of outputs and inuts defined
     // by constrcution
     void interpolate (double* outputs, const double* inputs);
  /*   void interpolate (std::vector<double>& outputs,
                       const std::vector<double>& inputs); */
+    void train (double* desired_outputs, const double* inputs);
     void dotify (std::ofstream& fs);
+    void learning_rate_set (double lr);
+    double learning_rate_get ();
 
   private:
     std::vector<Perceptron*> perceptrons_;
     std::vector<Perceptron*> inputs_;
     std::vector<Perceptron*> outputs_;
+    void initialize_network_ (std::vector<unsigned>& first_layer, neuralMap& neural_map);
     void build_perceptron_ (neuralMap& neural_map,
                             unsigned next_idx,
                             Perceptron* cur);
+    double learning_rate_;
+    void unmark_network_ ();
 };
 
 #endif /* !NETWORK_HH_ */
