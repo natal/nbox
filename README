@@ -1,4 +1,4 @@
-the FANN project is a C++ artificial neural network library.
+The FANN project is a C++ artificial neural network library.
 The initial goal is to build a solid base for further algorithm optimisations.
 
 Development has started on december 23rd 2011 by Benjamin Roux.

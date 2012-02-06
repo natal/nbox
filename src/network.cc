@@ -112,7 +112,7 @@ void Network::interpolate (double* outputs, const double* inputs)
 
 void Network::train (double* desired_outputs, const double* inputs)
 {
-  double* outputs = new double(inputs_.size ());
+  double* outputs = new double(outputs_.size ());
   double* out_ptr = outputs;
   double* des_ptr = desired_outputs;
   interpolate (outputs, inputs);
@@ -160,4 +160,14 @@ void Network::learning_rate_set (double lr)
 double Network::learning_rate_get ()
 {
   return learning_rate_;
+}
+
+size_t Network::inputs_count ()
+{
+  return inputs_.size ();
+}
+
+size_t Network::outputs_count ()
+{
+  return outputs_.size ();
 }

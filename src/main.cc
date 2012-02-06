@@ -6,8 +6,6 @@
 #include <fstream>
 #include <string>
 #include <stack>
-#define NB_OUTPUTS 2
-#define NB_INPUTS 3
 
 int main (int argc, char** argv)
 {
@@ -22,33 +20,63 @@ int main (int argc, char** argv)
     parser.parse_file (argv[1]);
     Network* network = parser.retrieve_network ();
 
-    std::ofstream fs;
-    fs.open ("nm.dot");
-    fs << "digraph \"neural map\"" << std::endl;
-    fs << "{" << std::endl;
-    network->dotify (fs);
-    fs << "}" << std::endl;
 
-    double outputs[NB_OUTPUTS];
-    double inputs[NB_INPUTS];
+    size_t icount = network->inputs_count ();
+    size_t ocount = network->outputs_count ();
+    double* inputs = new double[icount];
+    double* outputs = new double[ocount];
 
-    for (unsigned ipt = 0; ipt < NB_INPUTS; ipt++)
+    char choice = 'y';
+
+    while (choice == 'y')
     {
-      std::cout << "Enter input no " << ipt << std::endl;
-      std::cin >> inputs[ipt];
+      for (unsigned ipt = 0; ipt < icount; ipt++)
+      {
+        std::cout << "Enter input no " << ipt << std::endl;
+        std::cin >> inputs[ipt];
+      }
+      network->interpolate(outputs, inputs);
+
+      std::cout << "inputs : " << std::endl;
+      for (unsigned i = 0; i < icount - 1; i++)
+        std::cout << inputs[i] << ", ";
+      std::cout << inputs[icount - 1] << std::endl;
+
+      std::cout << "outputs : " << std::endl;
+      for (unsigned i = 0; i < ocount - 1; i++)
+        std::cout << outputs[i] << ", ";
+      std::cout << outputs[ocount - 1] << std::endl;
+
+      std::cout << "Train ? [y/n]" << std::endl;
+      std::cin >> choice;
+      if (choice == 'y')
+      {
+        for (unsigned opt = 0; opt < ocount; opt++)
+        {
+          std::cout << "Enter desired output no " << opt << std::endl;
+          std::cin >> outputs[opt];
+        }
+        network->train(outputs, inputs);
+      }
     }
-    network->interpolate(outputs, inputs);
 
-    std::cout << "inputs : " << std::endl;
-    for (int i = 0; i < NB_INPUTS - 1; i++)
-      std::cout << inputs[i] << ", ";
-    std::cout << inputs[NB_INPUTS - 1] << std::endl;
-
-    std::cout << "outputs : " << std::endl;
-    for (int i = 0; i < NB_OUTPUTS - 1; i++)
-      std::cout << outputs[i] << ", ";
-    std::cout << outputs[NB_OUTPUTS - 1] << std::endl;
-
+    std::cout << "Save to .dot ? [y/n]" << std::endl;
+    std::cin >> choice;
+    if (choice == 'y')
+    {
+      std::ofstream fs;
+      std::string rel_path;
+      std::cout << "Save to file (Will erase file if already exists): ";
+      std::cin >> rel_path;
+      std::cout << std::endl;
+      fs.open ((rel_path + ".dot").c_str());
+      fs << "digraph \"neural map\"" << std::endl;
+      fs << "{" << std::endl;
+      network->dotify (fs);
+      fs << "}" << std::endl;
+    }
+    delete[] inputs;
+    delete[] outputs;
   }
   catch (NoPerceptronException ex)
   {

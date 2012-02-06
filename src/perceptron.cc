@@ -147,6 +147,7 @@ void Perceptron::propagate_err ()
 
 void Perceptron::adjust_weights (std::queue<Perceptron*>& queue)
 {
+  // Inbound Axons adjustment
   std::vector<axon*>::iterator in_it = inputs_.begin ();
   for (; in_it != inputs_.end (); in_it++)
   {
@@ -154,7 +155,13 @@ void Perceptron::adjust_weights (std::queue<Perceptron*>& queue)
     delta_weight *= deriv_trans_func_ (action_potential_);
     delta_weight *= (*in_it)->receiver_get ()->activation_val_;
     (*in_it)->weight_adjust (delta_weight) ;
-    Perceptron* receiver = (*in_it)->receiver_get ();
+  }
+
+  // Outbound propagation
+  std::vector<axon*>::iterator out_it = outputs_.begin ();
+  for (; out_it != outputs_.end (); out_it++)
+  {
+    Perceptron* receiver = (*out_it)->receiver_get ();
     if (!receiver->marked_)
     {
       queue.push (receiver);

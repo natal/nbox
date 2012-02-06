@@ -31,6 +31,8 @@ class Network
     void dotify (std::ofstream& fs);
     void learning_rate_set (double lr);
     double learning_rate_get ();
+    size_t inputs_count ();
+    size_t outputs_count ();
 
   private:
     std::vector<Perceptron*> perceptrons_;
