@@ -45,9 +45,19 @@ class Perceptron
     double measure_av ();
 
 
-    // Backpropagation components - requires all neurons
+    // Backpropagation operations - requires all neurons
     // to be unmarked
-    void propagate_err ();
+
+    /**
+    ** @brief Computes the local error according to the error of
+    **        its receivers' error. Uses width-first traversal to
+    **        propagate error
+    ** @param queue used to queue up the perceptrons in the order
+    **              required for backpropagation
+    */
+    void propagate_err (std::queue<Perceptron*>& queue);
+    void propagate_err (std::queue<Perceptron*>& queue, double out_err);
+
     void adjust_weights (std::queue<Perceptron*>& queue);
     void set_local_err (double err);
 

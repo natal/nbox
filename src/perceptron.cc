@@ -122,26 +122,43 @@ double Perceptron::measure_av ()
   return activation_val_;
 }
 
-// Backprogation components
-void Perceptron::propagate_err ()
+// Backprogation operations
+void Perceptron::propagate_err (std::queue<Perceptron*>& queue)
 {
-  if (!marked_)
+  std::vector<axon*>::iterator out_it = outputs_.begin ();
+  local_err_ = 0.;
+  for (; out_it != outputs_.end (); out_it++)
   {
-    marked_ = true;
-    std::vector<axon*>::iterator out_it = outputs_.begin ();
-    local_err_ = 0.;
-    for (; out_it != outputs_.end (); out_it++)
-    {
-      Perceptron* next = (*out_it)->receiver_get ();
-      local_err_ += (*out_it)->weight_get () * next->local_err_;
-    }
+    Perceptron* next = (*out_it)->receiver_get ();
+    local_err_ += (*out_it)->weight_get () * next->local_err_;
+  }
 
-    std::vector<axon*>::iterator in_it = inputs_.begin ();
-    for (; in_it != inputs_.end (); in_it++)
-    {
-      Perceptron* prev = (*in_it)->sender_get ();
-      prev->propagate_err ();
-    }
+  // width-first propagation
+  std::vector<axon*>::iterator in_it = inputs_.begin ();
+  for (; in_it != inputs_.end (); in_it++)
+  {
+    Perceptron* sender = (*in_it)->sender_get ();
+    if (!sender->marked_)
+     {
+       queue.push (sender);
+       sender->mark ();
+     }
+  }
+}
+
+void Perceptron::propagate_err (std::queue<Perceptron*>& queue, double out_err)
+{
+  local_err_ = out_err;
+  // width-first propagation
+  std::vector<axon*>::iterator in_it = inputs_.begin ();
+  for (; in_it != inputs_.end (); in_it++)
+  {
+    Perceptron* sender = (*in_it)->sender_get ();
+    if (!sender->marked_)
+     {
+       queue.push (sender);
+       sender->mark ();
+     }
   }
 }
 

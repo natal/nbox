@@ -116,33 +116,48 @@ void Network::train (double* desired_outputs, const double* inputs)
   double* out_ptr = outputs;
   double* des_ptr = desired_outputs;
   interpolate (outputs, inputs);
+  std::queue<Perceptron*> e_queue; // queue used for error propagation
+  std::queue<Perceptron*> w_queue; // queue used for weight adjustment
 
   unmark_network_ ();
 
-  std::vector<Perceptron*>::iterator out_it = outputs_.begin ();
-  for (; out_it != outputs_.end(); out_it++, des_ptr++, out_ptr++)
-  {
-    double local_err = *des_ptr - *out_ptr;
-    (*out_it)->set_local_err (local_err);
-  }
+  /****************  ERROR BACKPROPAGATION  **********************************/
+  /**/std::vector<Perceptron*>::iterator out_it = outputs_.begin ();
+  /**/for (; out_it != outputs_.end(); out_it++, des_ptr++, out_ptr++)
+  /**/{
+  /**/   double local_err = *des_ptr - *out_ptr;
+  /**/   (*out_it)->propagate_err (e_queue, local_err);
+  /**/}
+  /**/ // Backpropagate error using a width-first traversal of the
+  /**/ // neural map
+  /**/while (!e_queue.empty ())
+  /**/{
+  /**/   Perceptron* front = e_queue.front ();
+  /**/   e_queue.pop ();
+  /**/   front->propagate_err (e_queue);
+  /**/}
+  /**/
+  /***************************************************************************/
 
   unmark_network_ ();
 
-  std::queue<Perceptron*> width_queue;
-  std::vector<Perceptron*>::iterator in_it = inputs_.begin ();
+  /****************  WEIGHT ADJUSTMENTS  *************************************/
+  /**/std::vector<Perceptron*>::iterator in_it = inputs_.begin ();
+  /**/
+  /**/for (in_it = inputs_.begin (); in_it != inputs_.end (); in_it++)
+  /**/   w_queue.push (*in_it);
+  /**/
+  /**/ // weight adjustments requires a width-first traversal of the map
+  /**/ // A queue is used for that
+  /**/
+  /**/while (!w_queue.empty ())
+  /**/{
+  /**/   Perceptron* front = w_queue.front ();
+  /**/   w_queue.pop ();
+  /**/   front->adjust_weights (w_queue);
+  /**/}
+  /***************************************************************************/
 
-  for (in_it = inputs_.begin (); in_it != inputs_.end (); in_it++)
-    width_queue.push (*in_it);
-
-  // weight adjustments requires a width-first traversal of the map
-  // A queue is used for that
-
-  while (!width_queue.empty ())
-  {
-    Perceptron* front = width_queue.front ();
-    width_queue.pop ();
-    front->adjust_weights (width_queue);
-  }
   delete[] outputs;
 }
 void Network::dotify (std::ofstream& fs)
