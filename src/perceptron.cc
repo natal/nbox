@@ -132,6 +132,7 @@ void Perceptron::propagate_err (std::queue<Perceptron*>& queue)
     Perceptron* next = (*out_it)->receiver_get ();
     local_err_ += (*out_it)->weight_get () * next->local_err_;
   }
+  local_err_ *= 1 - activation_val_ * activation_val_;
 
   // width-first propagation
   std::vector<axon*>::iterator in_it = inputs_.begin ();
