@@ -132,7 +132,6 @@ void Perceptron::propagate_err (std::queue<Perceptron*>& queue)
     Perceptron* next = (*out_it)->receiver_get ();
     local_err_ += (*out_it)->weight_get () * next->local_err_;
   }
-  local_err_ *= 1 - activation_val_ * activation_val_;
 
   // width-first propagation
   std::vector<axon*>::iterator in_it = inputs_.begin ();
@@ -167,14 +166,18 @@ void Perceptron::adjust_weights (std::queue<Perceptron*>& queue)
 {
   // Inbound Axons adjustment
   std::vector<axon*>::iterator in_it = inputs_.begin ();
+
+  double deriv_val = deriv_trans_func_ (action_potential_);
+
   for (; in_it != inputs_.end (); in_it++)
   {
     double delta_weight = learning_rate_ * local_err_;
-    delta_weight *= deriv_trans_func_ (action_potential_);
+    delta_weight *= deriv_val;
+    // Not sure weather delta should be multiplied by the previous
+    // activation value
     delta_weight *= (*in_it)->receiver_get ()->activation_val_;
     (*in_it)->weight_adjust (delta_weight) ;
   }
-
   // Outbound propagation
   std::vector<axon*>::iterator out_it = outputs_.begin ();
   for (; out_it != outputs_.end (); out_it++)

@@ -1,8 +1,11 @@
 include ../Makefile.rules
 
-all: ${OBJ}
-	${CC} ${FLAGS} -o ${BIN} ${OBJ}
-	mv ${BIN} ..
+all: lib${LIB}.so
+	echo "lib${LIB}.so generated"
+
+lib${LIB}.so: ${LIBOBJ}
+	${CC} ${SOFLAGS} -o lib${LIB}.so ${LIBOBJ}
+	mv lib${LIB}.so ..
 
 %.o:
 	${CC} ${FLAGS} -c $(@:.o=.cc)
