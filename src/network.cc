@@ -95,13 +95,13 @@ void Network::interpolate (double* outputs, const double* inputs)
   const double* in_ptr = inputs;
   std::vector<Perceptron*>::iterator in_it = inputs_.begin ();
 
-  /************** SMART STUFF HAPPENS HERE *****************************************/
-  /**/                                                                           /**/
-  /*    Neuron activation : triggers a chain message transmition reaction          */
-  /**/ for (in_it = inputs_.begin (); in_it != inputs_.end (); in_it++, in_ptr++)/**/
-  /**/   (*in_it)->activate (*in_ptr);                                           /**/
-  /**/                                                                           /**/
-  /*********************************************************************************/
+  /************** SMART STUFF HAPPENS HERE ************************************/
+  /**/                                                                      /**/
+  /*    Neuron activation : triggers a chain message transmition reacti       */
+  /**/ for (; in_it != inputs_.end (); in_it++, in_ptr++)                   /**/
+  /**/   (*in_it)->activate (*in_ptr);                                      /**/
+  /**/                                                                      /**/
+  /****************************************************************************/
 
   // collecting outputs
   double* out_ptr = outputs;
@@ -112,10 +112,12 @@ void Network::interpolate (double* outputs, const double* inputs)
 
 void Network::train (double* desired_outputs, const double* inputs)
 {
-  double* outputs = new double(outputs_.size ());
+  double* outputs = new double[outputs_.size ()];
   double* out_ptr = outputs;
   double* des_ptr = desired_outputs;
+
   interpolate (outputs, inputs);
+
   std::queue<Perceptron*> e_queue; // queue used for error propagation
   std::queue<Perceptron*> w_queue; // queue used for weight adjustment
 
