@@ -1,1 +1,3 @@
-. Understand why outputs aren't modified as they should be ||| SOLVED
+. Change Network evaluation to a width first traversal. 
+  The current depth first traversal is highly inefficient.
+  utd_inputs_ attribute becomes obsolete.
