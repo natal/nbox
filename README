@@ -2,4 +2,5 @@ The FANN project is a C++ artificial neural network library.
 The initial goal is to build a solid base for further algorithm optimisations.
 
 Development has started on december 23rd 2011 by Benjamin Roux.
-Compilation produces a rudimentary test program for now.
+Compilation produces a dynamic library file (.so) at the root of the directory.
+Headers are located in the src directory.
