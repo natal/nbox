@@ -1,6 +1,27 @@
-The FANN project is a C++ artificial neural network library.
-The initial goal is to build a solid base for further algorithm optimisations.
+<DESCRIPTION>
 
-Development has started on december 23rd 2011 by Benjamin Roux.
+The FANN project is a C++ artificial neural network library.
+It implements the feed-forward network and backpropagation-based learning models.
+The current goal is to build a solid base for further optimisations.
+
+Development has started on december 23rd 2011.
+
+<COPYING>
+
+This software is under the GPL GNU public license. For more information,
+read the terms and conditions in the COPYING file at the root of this project
+
+<COMPILATION>
+
+In order to use the library you must build the dynamic library file "libfann.so".
+Simply use the following command to build the entire library:
+
+$>./configure && make all
+
 Compilation produces a dynamic library file (.so) at the root of the directory.
-Headers are located in the src directory.
+In order to link the dynamic library to your program, use the headers located
+in the src directory.
+
+<AUTHOR>
+
+Benjamin Roux - benjamin.roux@epita.fr
