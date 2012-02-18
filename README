@@ -1,6 +1,6 @@
 <DESCRIPTION>
 
-The FANN project is a C++ artificial neural network library.
+The NBOX project is a C++ artificial neural network library.
 It implements the feed-forward network and backpropagation-based learning models.
 The current goal is to build a solid base for further optimisations.
 
@@ -13,7 +13,7 @@ read the terms and conditions in the COPYING file at the root of this project
 
 <COMPILATION>
 
-In order to use the library you must build the dynamic library file "libfann.so".
+In order to use the library you must build the dynamic library file "libnbox.so".
 Simply use the following command to build the entire library:
 
 $>./configure && make all

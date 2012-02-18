@@ -5,6 +5,6 @@ echo 'LIBSRC=network.cc perceptron.cc parser.cc' >> Makefile.rules
 echo 'OBJ=$(SRC:.cc=.o)' >> Makefile.rules
 echo 'LIBOBJ=$(LIBSRC:.cc=.o)' >> Makefile.rules
 echo "BIN=ann" >> Makefile.rules
-echo "LIB=fann" >> Makefile.rules
+echo "LIB=nbox" >> Makefile.rules
 echo "SOFLAGS=-Wall -Wextra -Werror -pedantic -std=c++98 -fPIC" >> Makefile.rules
 
