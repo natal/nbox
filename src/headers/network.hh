@@ -50,6 +50,7 @@ class Network
                       const std::vector<double>& inputs); */
     void train (double* desired_outputs, const double* inputs);
     void dotify (std::ofstream& fs);
+    void dotify_back (std::ofstream& fs);
     void learning_rate_set (double lr);
     double learning_rate_get ();
     size_t inputs_count ();

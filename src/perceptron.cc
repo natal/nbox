@@ -31,7 +31,6 @@ Perceptron::Perceptron (int index, double learning_rate)
     learning_rate_ (learning_rate),
     local_err_ (0.),
     index_ (index),
-    inputs_utd_ (0),
     marked_ (false)
 {
 }
@@ -49,7 +48,6 @@ Perceptron::Perceptron (int index,
     learning_rate_ (learning_rate),
     local_err_ (0.),
     index_ (index),
-    inputs_utd_ (0),
     marked_ (false)
 {
 }
@@ -76,45 +74,51 @@ int Perceptron::get_index ()
   return index_;
 }
 
-void Perceptron::activate ()
+void Perceptron::activate (std::queue<Perceptron*>& w_queue)
 {
+  std::vector<axon*>::iterator in_it = inputs_.begin ();
 
-  inputs_utd_++;
-  // Neuron will only activate if all inputs have been updated
-  if (inputs_utd_ >= inputs_.size ())
+  // weighted sum computation
+  action_potential_ = 0.;
+  for (; in_it != inputs_.end (); in_it++)
   {
-    std::vector<axon*>::iterator in_it = inputs_.begin ();
+    double msg = (*in_it)->message_get ();
+    double weight = (*in_it)->weight_get ();
+    action_potential_ += msg * weight;
+  }
 
-    // weighted sum computation
-    action_potential_ = 0.;
-    for (; in_it != inputs_.end (); in_it++)
+  // message transmission
+  std::vector<axon*>::iterator out_it = outputs_.begin ();
+  activation_val_ = transfer_func_ (action_potential_);
+  for (; out_it != outputs_.end (); out_it++)
+  {
+    (*out_it)->message_set (activation_val_);
+    Perceptron* receiver = (*out_it)->receiver_get ();
+
+    if (!receiver->marked_)
     {
-      double msg = (*in_it)->message_get ();
-      double weight = (*in_it)->weight_get ();
-      action_potential_ += msg * weight;
+      receiver->mark ();
+      w_queue.push (receiver);
     }
 
-    // message transmission
-    std::vector<axon*>::iterator out_it = outputs_.begin ();
-    activation_val_ = transfer_func_ (action_potential_);
-    for (; out_it != outputs_.end (); out_it++)
-    {
-      (*out_it)->message_set (activation_val_);
-      (*out_it)->receiver_get ()->activate ();
-    }
-    // Back to outdated state
-    inputs_utd_ = 0;
   }
 }
 
-void Perceptron::activate (double input_val)
+void Perceptron::activate (std::queue<Perceptron*>& w_queue, double input_val)
 {
   activation_val_ = input_val;
   std::vector<axon*>::iterator out_it = outputs_.begin ();
   for (; out_it != outputs_.end (); out_it++)
   {
     (*out_it)->message_set (input_val);
-    (*out_it)->receiver_get ()->activate ();
+    Perceptron* receiver = (*out_it)->receiver_get ();
+
+    if (!receiver->marked_)
+    {
+      receiver->mark ();
+      w_queue.push (receiver);
+    }
+
   }
 }
 
@@ -124,8 +128,22 @@ void Perceptron::dotify (std::ofstream& fs)
   for (; out_it != outputs_.end (); out_it++)
   {
     Perceptron* receiver = (*out_it)->receiver_get ();
-    fs << "P" << index_ << " -> " << "P" << receiver->index_;
+    fs << "\"P" << index_ << " " << local_err_ << "\""
+       << " -> " << "\"P" << receiver->index_ << " "
+       << receiver->local_err_ << "\"";
     fs << " [label=" << (*out_it)->weight_get () << "];";
+    fs << std::endl;
+  }
+}
+
+void Perceptron::dotify_back (std::ofstream& fs)
+{
+  std::vector<axon*>::iterator in_it = inputs_.begin ();
+  for (; in_it != inputs_.end (); in_it++)
+  {
+    Perceptron* sender = (*in_it)->sender_get();
+    fs << "P" << index_ << " -> " << "P" << sender->index_;
+    fs << " [label=" << (*in_it)->weight_get () << "];";
     fs << std::endl;
   }
 }

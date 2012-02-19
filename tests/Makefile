@@ -9,3 +9,6 @@ clean:
 
 exec: all
 	LD_LIBRARY_PATH='../' ./${BIN} map-samples/map.nm
+
+debug: all
+	LD_LIBRARY_PATH='../' gdb ./${BIN}

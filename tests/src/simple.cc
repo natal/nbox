@@ -88,6 +88,8 @@ int main (int argc, char** argv)
     if (choice == 'y')
     {
       std::ofstream fs;
+      fs.precision(2);
+      fs << std::fixed;
       std::string rel_path;
       std::cout << "Save to file (Will erase file if already exists): ";
       std::cin >> rel_path;
@@ -97,6 +99,7 @@ int main (int argc, char** argv)
       fs << "{" << std::endl;
       network->dotify (fs);
       fs << "}" << std::endl;
+      fs.close ();
     }
     delete[] inputs;
     delete[] outputs;

@@ -1,3 +1,1 @@
-. Change Network evaluation to a width first traversal. 
-  The current depth first traversal is highly inefficient.
-  utd_inputs_ attribute becomes obsolete.
+. Find out why the learning process gets completly out of control

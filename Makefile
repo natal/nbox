@@ -22,3 +22,6 @@ dist: distclean
 
 check: all
 	make -C tests/ exec
+
+debug: all
+	make -C tests/ debug

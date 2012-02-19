@@ -71,10 +71,11 @@ class Perceptron
     ** @param input_val use this to replace to impose your own input value
     **                  otherwise input value is computed from input nerons
     */
-    void activate ();
-    void activate (double input_val);
+    void activate (std::queue<Perceptron*>& w_queue);
+    void activate (std::queue<Perceptron*>& w_queue, double input_val);
 
     void dotify (std::ofstream& fs);
+    void dotify_back (std::ofstream& fs);
     int get_index ();
 
     // Marking mecanism
@@ -115,7 +116,6 @@ class Perceptron
     double learning_rate_;
     double local_err_;
     int index_;
-    unsigned inputs_utd_;
     bool marked_;
 };
 

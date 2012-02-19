@@ -12,6 +12,7 @@ lib${LIB}.so: ${LIBOBJ}
 
 clean:
 	rm -fR *.o *.a *.so .*.swp
+	rm -fR headers/*.o headers/*.a headers/*.so headers/.*.swp
 
 distclean: clean
 

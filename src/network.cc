@@ -116,13 +116,22 @@ void Network::interpolate (double* outputs, const double* inputs)
 {
   const double* in_ptr = inputs;
   std::vector<Perceptron*>::iterator in_it = inputs_.begin ();
+  std::queue<Perceptron*> width_queue;
+
+  unmark_network_ ();
 
   /************** SMART STUFF HAPPENS HERE ************************************/
   /**/                                                                      /**/
-  /*    Neuron activation : triggers a chain message transmition reacti       */
+  /*    Neuron activation : width-first activation of the network             */
   /**/ for (; in_it != inputs_.end (); in_it++, in_ptr++)                   /**/
-  /**/   (*in_it)->activate (*in_ptr);                                      /**/
+  /**/   (*in_it)->activate (width_queue, *in_ptr);                         /**/
   /**/                                                                      /**/
+  /**/ while (!width_queue.empty ())                                        /**/
+  /**/ {                                                                    /**/
+  /**/   Perceptron* front = width_queue.front ();                          /**/
+  /**/   width_queue.pop ();                                                /**/
+  /**/   front->activate (width_queue);                                     /**/
+  /**/ }                                                                    /**/
   /****************************************************************************/
 
   // collecting outputs
@@ -189,6 +198,13 @@ void Network::dotify (std::ofstream& fs)
   std::vector<Perceptron*>::iterator it = perceptrons_.begin ();
   for (; it != perceptrons_.end (); it++)
     (*it)->dotify (fs);
+}
+
+void Network::dotify_back (std::ofstream& fs)
+{
+  std::vector<Perceptron*>::iterator it = perceptrons_.begin ();
+  for (; it != perceptrons_.end (); it++)
+    (*it)->dotify_back (fs);
 }
 
 void Network::learning_rate_set (double lr)
