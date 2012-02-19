@@ -19,11 +19,31 @@
    If not, see <http://www.gnu.org/licenses/>.  */
 
 
-#include "perceptron.hh"
+#include "headers/perceptron.hh"
 
 Perceptron::Perceptron (int index, double learning_rate)
   : inputs_ (),
     outputs_ (),
+    transfer_func_ (sigmoid),
+    d_transfer_func_ (d_sigmoid),
+    action_potential_ (0.),
+    activation_val_ (0.),
+    learning_rate_ (learning_rate),
+    local_err_ (0.),
+    index_ (index),
+    inputs_utd_ (0),
+    marked_ (false)
+{
+}
+
+Perceptron::Perceptron (int index,
+                        double learning_rate,
+                        function fun,
+                        derivative d_fun)
+  : inputs_ (),
+    outputs_ (),
+    transfer_func_ (fun),
+    d_transfer_func_ (d_fun),
     action_potential_ (0.),
     activation_val_ (0.),
     learning_rate_ (learning_rate),
@@ -96,19 +116,6 @@ void Perceptron::activate (double input_val)
     (*out_it)->message_set (input_val);
     (*out_it)->receiver_get ()->activate ();
   }
-}
-
-double Perceptron::transfer_func_ (double x)
-{
-  return 1. / (1. + exp (-x));
-}
-
-double Perceptron::deriv_trans_func_ (double x)
-{
-  double exp_x = exp (x);
-  double denom = (1. + exp_x);
-  denom *= denom;
-  return exp_x / denom;
 }
 
 void Perceptron::dotify (std::ofstream& fs)
@@ -188,7 +195,7 @@ void Perceptron::adjust_weights (std::queue<Perceptron*>& queue)
   // Inbound Axons adjustment
   std::vector<axon*>::iterator in_it = inputs_.begin ();
 
-  double deriv_val = deriv_trans_func_ (action_potential_);
+  double deriv_val = d_transfer_func_ (action_potential_);
 
   for (; in_it != inputs_.end (); in_it++)
   {
@@ -212,7 +219,13 @@ void Perceptron::adjust_weights (std::queue<Perceptron*>& queue)
   }
 }
 
-void Perceptron::set_local_err (double err)
+void Perceptron::local_err_set (double err)
 {
   local_err_ = err;
+}
+
+void Perceptron::make_linear ()
+{
+  transfer_func_ = identity;
+  d_transfer_func_ = identity;
 }

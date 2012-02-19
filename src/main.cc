@@ -21,12 +21,12 @@
 
 /* This file is for testing purposes only */
 
-#include "network.hh"
-#include "exceptions.hh"
-#include "parser.hh"
 #include <fstream>
 #include <string>
 #include <stack>
+#include "headers/network.hh"
+#include "headers/exceptions.hh"
+#include "headers/parser.hh"
 
 int main (int argc, char** argv)
 {

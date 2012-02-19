@@ -7,8 +7,5 @@ clean:
 	make -C src/ clean
 	rm -fR *.o *.a *.so .*.swp ${BIN}
 
-exec:
-	./ann map-samples/map.nm
-
-check: all
+exec: all
 	LD_LIBRARY_PATH='../' ./${BIN} map-samples/map.nm

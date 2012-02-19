@@ -19,7 +19,7 @@
    If not, see <http://www.gnu.org/licenses/>.  */
 
 
-#include "network.hh"
+#include "headers/network.hh"
 
 Network::Network ()
   : perceptrons_ (),
@@ -92,6 +92,7 @@ void Network::build_perceptron_ (neuralMap& neural_map,
 
   if (!cur_cell->size ())
   {
+    cur->make_linear ();
     outputs_.push_back (cur);
     return;
   }

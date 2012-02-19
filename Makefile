@@ -8,6 +8,7 @@ lib:
 
 clean:
 	make -C src/ clean
+	make -C tests/ clean
 	rm -fR *.o *.a *.so .*.swp ann
 
 distclean: clean
@@ -18,3 +19,6 @@ distclean: clean
 dist: distclean
 	cd .. && tar cjvf ann.tar.bz2 ann/ --exclude ='.git'
 	mv ../ann.tar.bz2 .
+
+check: all
+	make -C tests/ exec

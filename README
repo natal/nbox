@@ -1,7 +1,7 @@
 <DESCRIPTION>
 
 The NBOX project is a C++ artificial neural network library.
-It implements the feed-forward network and backpropagation-based learning models.
+It implements the feed-forward network model combined with the backpropagation-based learning method.
 The current goal is to build a solid base for further optimisations.
 
 Development has started on december 23rd 2011.
@@ -9,7 +9,7 @@ Development has started on december 23rd 2011.
 <COPYING>
 
 This software is under the GPL GNU public license. For more information,
-read the terms and conditions in the COPYING file at the root of this project
+read the terms and conditions in the COPYING file at the root of this project.
 
 <COMPILATION>
 

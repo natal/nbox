@@ -22,9 +22,10 @@
 /* This file is for testing purposes only */
 
 #include <iostream>
-#include "../../src/network.hh"
-#include "../../src/exceptions.hh"
-#include "../../src/parser.hh"
+#include "../../src/headers/network.hh"
+#include "../../src/headers/basis_fun.hh"
+#include "../../src/headers/exceptions.hh"
+#include "../../src/headers/parser.hh"
 #include <fstream>
 #include <string>
 #include <stack>

@@ -35,23 +35,45 @@
 # include <fstream>
 # include <algorithm>
 # include "channel.hh"
+# include "basis_fun.hh"
 
 class Perceptron
 {
   public:
     typedef Channel<Perceptron*, Perceptron*, double> axon;
+
+    /**
+    ** @brief The perceptron's constructor.
+    ** @param index the index of the perceptron in the neural list.
+    ** @param learning_rate the learning rate of the perceptron.
+    */
     Perceptron (int index, double learning_rate);
+
+    Perceptron (int index,
+                double learning_rate,
+                function fun,
+                derivative d_fun);
+
     ~Perceptron ();
+
+    /**
+    ** @brief connect the perceptron to another.
+    ** @param out the perceptron to connect to
+    */
     void connect_to (Perceptron* out);
+
     /**
     ** @brief activate the neuron and transmit the neural message
     **         to the adjacent neurons:
-    **              retrieve the neural message from the inputs,
-    **              multiply by the weights and compute the activation function.
-                    Pass the result down to the output neurons.
+    **           - retrieve the neural message from the inputs,
+    **           - multiply by the weights and compute the activation function.
+    **           - Pass the result down to the output neurons.
+    ** @param input_val use this to replace to impose your own input value
+    **                  otherwise input value is computed from input nerons
     */
     void activate ();
     void activate (double input_val);
+
     void dotify (std::ofstream& fs);
     int get_index ();
 
@@ -60,6 +82,7 @@ class Perceptron
     bool is_marked ();
     void mark ();
     void unmark ();
+
     /**
     ** @brief measure the perceptron's last activation value
     */
@@ -78,15 +101,15 @@ class Perceptron
     */
     void propagate_err (std::queue<Perceptron*>& queue);
     void propagate_err (std::queue<Perceptron*>& queue, double out_err);
-
     void adjust_weights (std::queue<Perceptron*>& queue);
-    void set_local_err (double err);
+    void local_err_set (double err);
+    void make_linear ();
 
   private:
     std::vector<axon*> inputs_;
     std::vector<axon*> outputs_;
-    double transfer_func_ (double x);
-    double deriv_trans_func_ (double x);
+    function transfer_func_;
+    derivative d_transfer_func_;
     double action_potential_;
     double activation_val_;
     double learning_rate_;
