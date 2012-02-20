@@ -35,7 +35,7 @@
 # include <fstream>
 # include <algorithm>
 # include "channel.hh"
-# include "basis_fun.hh"
+# include "activ_fun.hh"
 
 class Perceptron
 {

@@ -19,24 +19,28 @@
    If not, see <http://www.gnu.org/licenses/>.  */
 
 
-/*
-** file: basis_fun.hh
-** author: benjamin
-** created on 18/02/12 at 21:04
-*/
+#include "headers/activ_fun.hh"
 
-#ifndef BASIS_FUN_HH_
-# define BASIS_FUN_HH_
-# include <cmath>
-# include <iostream>
-# include <cassert>
+double sigmoid (double x)
+{
+  return 1. / (1. + exp (-x));
+}
 
-typedef double (*function) (double);
-typedef double (*derivative) (double);
+double d_sigmoid (double x)
+{
+  double exp_x = exp (x);
+  double denom = (1. + exp_x);
+  denom *= denom;
+  return exp_x / denom;
+}
 
-double sigmoid (double x);
-double d_sigmoid (double x);
-double d_tanh (double x);
-double identity (double x);
+double d_tanh (double x)
+{
+  double htan_x = tanh (x);
+  return 1 - htan_x * htan_x;
+}
 
-#endif /* !BASIS_FUN_HH_ */
+double identity (double x)
+{
+  return x;
+}

@@ -23,7 +23,7 @@
 
 #include <iostream>
 #include "../../src/headers/network.hh"
-#include "../../src/headers/basis_fun.hh"
+#include "../../src/headers/activ_fun.hh"
 #include "../../src/headers/exceptions.hh"
 #include "../../src/headers/parser.hh"
 #include <fstream>
