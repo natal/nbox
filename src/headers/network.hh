@@ -1,5 +1,5 @@
 /* Interface code for dealing with text properties.
-   Copyright (C) 2011
+   Copyright (C) 2011-2012
    Free Software Foundation, Inc.
 
    This file is part of nbox.

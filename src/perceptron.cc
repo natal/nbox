@@ -1,5 +1,5 @@
 /* Interface code for dealing with text properties.
-   Copyright (C) 2011
+   Copyright (C) 2011-2012
    Free Software Foundation, Inc.
 
    This file is part of nbox.
@@ -64,7 +64,10 @@ Perceptron::~Perceptron ()
 void Perceptron::connect_to (Perceptron* out)
 {
   // double allocation for easy destruction
-  axon* new_axon = new axon (this, out, 0.);
+
+  double rand_weight = (double)(rand () % RAND_MOD - RAND_MOD_2) / RAND_MOD;
+  rand_weight *= RAND_RANGE;
+  axon* new_axon = new axon (this, out, 1.0, rand_weight);
   out->inputs_.push_back (new_axon);
   outputs_.push_back (new_axon);
 }

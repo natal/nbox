@@ -1,5 +1,5 @@
 /* Interface code for dealing with text properties.
-   Copyright (C) 2011
+   Copyright (C) 2011-2012
    Free Software Foundation, Inc.
 
    This file is part of nbox.
@@ -65,6 +65,7 @@ void Network::initialize_network_ (std::vector<unsigned>& first_layer,
   std::vector<unsigned>::iterator it_fl = first_layer.begin ();
   size_t nb_perceptrons = neural_map.size ();
 
+  srand (time (NULL));
   for (size_t i = 0; i < nb_perceptrons; i++)
     perceptrons_.push_back (new Perceptron (i, learning_rate_));
 

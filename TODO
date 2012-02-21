@@ -1,1 +1,12 @@
 . Find out why the learning process gets completly out of control
+  -> The problem is related to the fact that the learning coefficient
+     should adapt to how far the network is in the learning process.
+  -> The program should distinguish between two main phases:
+     * A broader phase where the coefficient should be large enough to
+       speed up convergence towards the local minimum (in error).
+     * A more narrow phase where the coefficient should be carefully
+       chosen in order to find the local minimum in a small interval
+  -> A solution involves learning from a cross problem and using the
+     second derivative and Hessian matrices...
+     ==Need more information about this==
+

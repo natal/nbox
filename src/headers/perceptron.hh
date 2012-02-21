@@ -1,5 +1,5 @@
 /* Interface code for dealing with text properties.
-   Copyright (C) 2011
+   Copyright (C) 2011-2012
    Free Software Foundation, Inc.
 
    This file is part of nbox.
@@ -34,8 +34,14 @@
 # include <queue>
 # include <fstream>
 # include <algorithm>
+# include <ctime>
+
 # include "channel.hh"
 # include "activ_fun.hh"
+
+# define RAND_MOD 64
+# define RAND_MOD_2 32
+# define RAND_RANGE 0.1
 
 class Perceptron
 {
