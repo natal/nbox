@@ -83,6 +83,7 @@ void Network::unmark_network_ ()
   for (; it_pn != perceptrons_.end (); it_pn++)
     (*it_pn)->unmark ();
 }
+
 // recursive perceptron building (deep-first traversal of the neural map)
 void Network::build_perceptron_ (neuralMap& neural_map,
                                  unsigned cur_idx,
@@ -194,6 +195,7 @@ void Network::train (double* desired_outputs, const double* inputs)
 
   delete[] outputs;
 }
+
 void Network::dotify (std::ofstream& fs)
 {
   std::vector<Perceptron*>::iterator it = perceptrons_.begin ();
