@@ -25,7 +25,7 @@ Network::Network ()
   : perceptrons_ (),
     inputs_ (),
     outputs_ (),
-    learning_rate_ (1.)
+    learning_rate_ (0.2)
 {
 }
 
@@ -33,7 +33,7 @@ Network::Network (std::vector<unsigned>& first_layer, neuralMap& neural_map)
   : perceptrons_ (),
     inputs_ (),
     outputs_ (),
-    learning_rate_ (1.)
+    learning_rate_ (0.2)
 {
   this->initialize_network_ (first_layer, neural_map);
 }

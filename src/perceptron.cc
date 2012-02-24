@@ -216,9 +216,7 @@ void Perceptron::adjust_weights (std::queue<Perceptron*>& queue)
   // Inbound Axons adjustment
   std::vector<axon*>::iterator in_it = inputs_.begin ();
 
-  learning_rate_ = 1.;
-  if (learning_rate_ < 0.01)
-      learning_rate_ = 0.01;
+  learning_rate_ -= 0.0002;
 
   double deriv_val = d_transfer_func_ (action_potential_);
 
@@ -228,7 +226,7 @@ void Perceptron::adjust_weights (std::queue<Perceptron*>& queue)
     delta_weight *= deriv_val;
     // Not sure weather delta should be multiplied by the previous
     // activation value
-    delta_weight *= (*in_it)->receiver_get ()->activation_val_;
+    delta_weight *= activation_val_;
     (*in_it)->weight_adjust (delta_weight) ;
   }
   // Outbound propagation

@@ -31,9 +31,9 @@
 #include <string>
 #include <stack>
 
-double paraboloid (double x, double y)
+double paraboloid (double x)
 {
-    return cos(x * y);
+    return -x * x + 2 * x + 2;
 }
 
 int main (int argc, char** argv)
@@ -44,6 +44,7 @@ int main (int argc, char** argv)
     MapParser parser;
     std::cout << std::endl;
     std::cout << "Function learning test program" << std::endl;
+    std::cout << "Learning curve: polynomial" << std::endl;
     std::cout << std::endl;
 
     try
@@ -52,39 +53,55 @@ int main (int argc, char** argv)
         Network* network = parser.retrieve_network ();
         std::ofstream fs_plot_err;
         std::ofstream fs_plot_res;
+        std::ofstream fs_plot_fun;
 
         fs_plot_err.open ("err_surf.data");
+        fs_plot_res.open ("res_surf.data");
+        fs_plot_fun.open ("fun_surf.data");
 
 
         size_t icount = network->inputs_count ();
         size_t ocount = network->outputs_count ();
 
-        if (icount != 2 && ocount != 1)
+        if (icount != 1 && ocount != 1)
         {
             std::cout << std::endl <<
                 "WARNING : the provided neural map must" <<
-                " have 2 inputs and one output." << std::endl;
+                " have 1 input and one output." << std::endl;
             std::cout << std::endl;
         }
 
         double* inputs = new double[icount];
         double* outputs = new double[ocount];
 
-        for (double x = -10.; x - 10. <= 0; x += 0.2f)
+        for (unsigned iter = 0; iter < 1000; ++iter)
         {
-            for (double y = -10.; y - 10. <= 0; y += 0.2f)
+            double acc_err = 0.;
+            for (double x = -10.; x - 10. <= 0; x += 0.2f)
             {
                 inputs[0] = x;
-                inputs[1] = y;
                 network->interpolate (outputs, inputs);
-                double val = paraboloid(x, y);
+                double val = paraboloid (x);
                 double err = outputs[0] - val;
-                outputs[0] = val;
+                err *= err;
+                acc_err += err;
+                //fs_plot_res << x << " " << outputs[0] << std::endl;
+                //network->train (outputs, inputs);
+                //fs_plot_fun << x << " " << val << std::endl;
+            }
+            acc_err /= 101.;
+            fs_plot_err << iter << " " << acc_err << std::endl;
+            outputs[0] = acc_err;
+            for (double x = -10.; x - 10. <= 0; x += 0.2f)
+            {
+                inputs[0] = x;
                 network->train (outputs, inputs);
-                fs_plot_err << x << " " << y << " " << err << std::endl;
             }
         }
+
         fs_plot_err.close ();
+        fs_plot_res.close ();
+        fs_plot_fun.close ();
 
         char choice = 'n';
 

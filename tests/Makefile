@@ -13,7 +13,7 @@ simple:
 
 funreg:
 	make -C src/ funreg
-	LD_LIBRARY_PATH='../' ./${BIN} map-samples/map3.nm
+	LD_LIBRARY_PATH='../' ./${BIN} map-samples/map2.nm
 
 exec: all
 	LD_LIBRARY_PATH='../' ./${BIN} map-samples/map3.nm

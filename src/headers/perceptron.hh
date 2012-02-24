@@ -42,6 +42,7 @@
 # define RAND_MOD 64
 # define RAND_MOD_2 32
 # define RAND_RANGE 0.1
+# define RAND_MIN 0.0001
 
 class Perceptron
 {
