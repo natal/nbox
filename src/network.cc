@@ -71,9 +71,7 @@ void Network::initialize_network_ (std::vector<unsigned>& first_layer,
     perceptrons_.push_back (new Perceptron (i, learning_rate_));
 
   for (; it_fl != first_layer.end (); it_fl++)
-  {
     inputs_.push_back (perceptrons_[*it_fl]);
-  }
 
   for (size_t i = 0; i < nb_perceptrons; i++)
       build_perceptron_ (neural_map, i, perceptrons_[i]);
@@ -96,25 +94,29 @@ void Network::build_perceptron_ (neuralMap& neural_map,
   std::vector<unsigned>* cur_cell = neural_map[cur_idx];
   std::vector<unsigned>::iterator it = cur_cell->begin ();
 
-  if (!cur_cell->size ())
+  if (!cur->is_marked ())
   {
-    cur->make_linear ();
-    outputs_.push_back (cur);
-    return;
-  }
+      cur->mark ();
+      if (!cur_cell->size ())
+      {
+          cur->make_linear ();
+          outputs_.push_back (cur);
+          return;
+      }
 
-  for (; it != cur_cell->end (); it++)
-  {
-    if (*it >= perceptrons_.size ())
-      throw NoPerceptronException (*it);
+      for (; it != cur_cell->end (); it++)
+      {
+          if (*it >= perceptrons_.size ())
+              throw NoPerceptronException (*it);
 
-    Perceptron* next = perceptrons_[*it];
-    cur->connect_to (next);
-    if (!next->is_marked ())
-    {
-      build_perceptron_ (neural_map, *it, next);
-      next->mark ();
-    }
+          Perceptron* next = perceptrons_[*it];
+          cur->connect_to (next);
+          if (!next->is_marked ())
+          {
+              build_perceptron_ (neural_map, *it, next);
+              next->mark ();
+          }
+      }
   }
 }
 

@@ -5,7 +5,7 @@ all:
 
 clean:
 	make -C src/ clean
-	rm -fR *.o *.a *.so .*.swp ${BIN}
+	rm -fR *.o *.a *.so .*.swp *.dot *.png ${BIN}
 
 simple:
 	make -C src/ simple
