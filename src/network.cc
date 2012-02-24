@@ -66,14 +66,18 @@ void Network::initialize_network_ (std::vector<unsigned>& first_layer,
   size_t nb_perceptrons = neural_map.size ();
 
   srand (time (NULL));
+
   for (size_t i = 0; i < nb_perceptrons; i++)
     perceptrons_.push_back (new Perceptron (i, learning_rate_));
 
   for (; it_fl != first_layer.end (); it_fl++)
   {
     inputs_.push_back (perceptrons_[*it_fl]);
-    build_perceptron_ (neural_map, *it_fl, perceptrons_[*it_fl]);
   }
+
+  for (size_t i = 0; i < nb_perceptrons; i++)
+      build_perceptron_ (neural_map, i, perceptrons_[i]);
+
   unmark_network_ ();
 }
 

@@ -23,5 +23,11 @@ dist: distclean
 check: all
 	make -C tests/ exec
 
+simple: all
+	make -C tests/ simple
+
+funreg: all
+	make -C tests/ funreg
+
 debug: all
 	make -C tests/ debug

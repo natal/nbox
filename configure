@@ -1,8 +1,10 @@
 echo "CC=g++" > Makefile.rules
 echo "BINFLAGS=-Wall -Wextra -Werror -pedantic -std=c++98" >> Makefile.rules
-echo 'SRC=fun_reg.cc' >> Makefile.rules
+echo 'SRCFR=fun_reg.cc' >> Makefile.rules
+echo 'SRCSIM=simple.cc' >> Makefile.rules
 echo 'LIBSRC=network.cc perceptron.cc parser.cc activ_fun.cc' >> Makefile.rules
-echo 'OBJ=$(SRC:.cc=.o)' >> Makefile.rules
+echo 'OBJFR=$(SRCFR:.cc=.o)' >> Makefile.rules
+echo 'OBJSIM=$(SRCSIM:.cc=.o)' >> Makefile.rules
 echo 'LIBOBJ=$(LIBSRC:.cc=.o)' >> Makefile.rules
 echo "BIN=ann" >> Makefile.rules
 echo "LIB=nbox" >> Makefile.rules

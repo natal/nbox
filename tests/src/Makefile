@@ -1,7 +1,15 @@
 include ../../Makefile.rules
 
-all: ${OBJ}
-	${CC} -L../../ -l${LIB} ${BINFLAGS} -o ${BIN} ${OBJ}
+all: ${OBJSIM}
+	${CC} -L../../ -l${LIB} ${BINFLAGS} -o ${BIN} ${OBJSIM}
+	mv ${BIN} ..
+
+simple: ${OBJSIM}
+	${CC} -L../../ -l${LIB} ${BINFLAGS} -o ${BIN} ${OBJSIM}
+	mv ${BIN} ..
+
+funreg: ${OBJFR}
+	${CC} -L../../ -l${LIB} ${BINFLAGS} -o ${BIN} ${OBJFR}
 	mv ${BIN} ..
 
 %.o:

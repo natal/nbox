@@ -216,6 +216,10 @@ void Perceptron::adjust_weights (std::queue<Perceptron*>& queue)
   // Inbound Axons adjustment
   std::vector<axon*>::iterator in_it = inputs_.begin ();
 
+  learning_rate_ = 1.;
+  if (learning_rate_ < 0.01)
+      learning_rate_ = 0.01;
+
   double deriv_val = d_transfer_func_ (action_potential_);
 
   for (; in_it != inputs_.end (); in_it++)

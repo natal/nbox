@@ -7,6 +7,14 @@ clean:
 	make -C src/ clean
 	rm -fR *.o *.a *.so .*.swp ${BIN}
 
+simple:
+	make -C src/ simple
+	LD_LIBRARY_PATH='../' ./${BIN} map-samples/map3.nm
+
+funreg:
+	make -C src/ funreg
+	LD_LIBRARY_PATH='../' ./${BIN} map-samples/map3.nm
+
 exec: all
 	LD_LIBRARY_PATH='../' ./${BIN} map-samples/map3.nm
 

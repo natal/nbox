@@ -33,7 +33,7 @@
 
 double paraboloid (double x, double y)
 {
-    return x * y;
+    return cos(x * y);
 }
 
 int main (int argc, char** argv)
@@ -42,9 +42,9 @@ int main (int argc, char** argv)
         return 1;
 
     MapParser parser;
+    std::cout << std::endl;
     std::cout << "Function learning test program" << std::endl;
-    std::cout << "Warning : the provided neural map must" <<
-                 " have 2 inputs and one output." << std::endl;
+    std::cout << std::endl;
 
     try
     {
@@ -58,12 +58,21 @@ int main (int argc, char** argv)
 
         size_t icount = network->inputs_count ();
         size_t ocount = network->outputs_count ();
+
+        if (icount != 2 && ocount != 1)
+        {
+            std::cout << std::endl <<
+                "WARNING : the provided neural map must" <<
+                " have 2 inputs and one output." << std::endl;
+            std::cout << std::endl;
+        }
+
         double* inputs = new double[icount];
         double* outputs = new double[ocount];
 
-        for (double x = -10.; x - 10. <= 0; x++)
+        for (double x = -10.; x - 10. <= 0; x += 0.2f)
         {
-            for (double y = -10.; y - 10. <= 0; y++)
+            for (double y = -10.; y - 10. <= 0; y += 0.2f)
             {
                 inputs[0] = x;
                 inputs[1] = y;
