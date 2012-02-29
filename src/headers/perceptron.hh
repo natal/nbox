@@ -84,6 +84,7 @@ class Perceptron
     void dotify (std::ofstream& fs);
     void dotify_back (std::ofstream& fs);
     int get_index ();
+    void adjust_rate (double delta);
 
     // Marking mecanism
 

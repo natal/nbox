@@ -25,7 +25,7 @@ Network::Network ()
   : perceptrons_ (),
     inputs_ (),
     outputs_ (),
-    learning_rate_ (0.2)
+    learning_rate_ (1.)
 {
 }
 
@@ -33,7 +33,7 @@ Network::Network (std::vector<unsigned>& first_layer, neuralMap& neural_map)
   : perceptrons_ (),
     inputs_ (),
     outputs_ (),
-    learning_rate_ (0.2)
+    learning_rate_ (1.)
 {
   this->initialize_network_ (first_layer, neural_map);
 }
@@ -234,4 +234,12 @@ size_t Network::inputs_count ()
 size_t Network::outputs_count ()
 {
   return outputs_.size ();
+}
+
+void Network::adjust_rate (double delta)
+{
+    learning_rate_ -= delta;
+    std::vector<Perceptron*>::iterator it = perceptrons_.begin ();
+    for (; it != perceptrons_.end (); it++)
+        (*it)->adjust_rate (delta);
 }

@@ -18,5 +18,5 @@ funreg:
 exec: all
 	LD_LIBRARY_PATH='../' ./${BIN} map-samples/map3.nm
 
-debug: all
+debug: funreg
 	LD_LIBRARY_PATH='../' gdb ./${BIN}

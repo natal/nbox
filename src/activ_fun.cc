@@ -21,17 +21,32 @@
 
 #include "headers/activ_fun.hh"
 
+double abs (double x)
+{
+    return x < 0 ? -x : x;
+}
+
+#define MAX_X 100
+
 double sigmoid (double x)
 {
-  return 1. / (1. + exp (-x));
+  if (x > MAX_X)
+      return 1;
+  else if (x < -MAX_X)
+      return 0;
+  double res = 1. / (1. + exp (-x));
+  return res;
 }
 
 double d_sigmoid (double x)
 {
+  if (abs (x) > MAX_X)
+      return 0;
   double exp_x = exp (x);
   double denom = (1. + exp_x);
   denom *= denom;
-  return exp_x / denom;
+  double res = exp_x / denom;
+  return res;
 }
 
 double d_tanh (double x)

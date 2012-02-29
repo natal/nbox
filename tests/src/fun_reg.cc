@@ -33,7 +33,7 @@
 
 double paraboloid (double x)
 {
-    return -x * x + 2 * x + 2;
+    return 0.2f * x;
 }
 
 int main (int argc, char** argv)
@@ -74,7 +74,9 @@ int main (int argc, char** argv)
         double* inputs = new double[icount];
         double* outputs = new double[ocount];
 
-        for (unsigned iter = 0; iter < 1000; ++iter)
+        double nb_iter = 1000.;
+        double delta = 1. / nb_iter;
+        for (unsigned iter = 0; iter < nb_iter; ++iter)
         {
             double acc_err = 0.;
             for (double x = -10.; x - 10. <= 0; x += 0.2f)
@@ -91,12 +93,13 @@ int main (int argc, char** argv)
             }
             acc_err /= 101.;
             fs_plot_err << iter << " " << acc_err << std::endl;
-            outputs[0] = acc_err;
             for (double x = -10.; x - 10. <= 0; x += 0.2f)
             {
                 inputs[0] = x;
+                outputs[0] = paraboloid (x);
                 network->train (outputs, inputs);
             }
+            network->adjust_rate (delta);
         }
 
         fs_plot_err.close ();
@@ -110,7 +113,7 @@ int main (int argc, char** argv)
         if (choice == 'y')
         {
             std::ofstream fs;
-            fs.precision(2);
+            fs.precision(7);
             fs << std::fixed;
             std::string rel_path;
             std::cout << "Save to file (Will erase file if already exists): ";

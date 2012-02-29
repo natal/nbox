@@ -24,6 +24,9 @@
 
 # include "channel.hh"
 
+# define MAX_WEIGHT 1.
+# define MIN_WEIGHT 0.0001
+
 template <typename S, typename R, typename M>
 Channel<S, R, M>::Channel (S sender, R receiver, M msg)
   : sender_ (sender), receiver_ (receiver), weight_ (1.), message_ (msg)
@@ -76,6 +79,16 @@ template <typename S, typename R, typename M>
 void Channel<S, R, M>::weight_adjust (double delta)
 {
   weight_ += delta;
+  /*
+  double sign = 1;
+  if (weight_ < 0)
+      sign = -1;
+//  double sign = weight_ / abs (weight_);
+//  if (abs (weight_ - MAX_WEIGHT) > 0)
+//     weight_ = sign * MAX_WEIGHT;
+  if (abs (weight_) < MIN_WEIGHT)
+     weight_ = sign * MIN_WEIGHT;
+     */
 }
 
 #endif /* !CHANNEL_HH_ */
