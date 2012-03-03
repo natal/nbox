@@ -129,9 +129,8 @@ void Perceptron::dotify (std::ofstream& fs)
   for (; out_it != outputs_.end (); out_it++)
   {
     Perceptron* receiver = (*out_it)->receiver_get ();
-    fs << "\"P" << index_ << " " << local_err_ << "\""
-       << " -> " << "\"P" << receiver->index_ << " "
-       << receiver->local_err_ << "\"";
+    fs << "P" << index_
+       << " -> " << "P" << receiver->index_ << " ";
     fs << " [label=" << (*out_it)->weight_get () << "];";
     fs << std::endl;
   }

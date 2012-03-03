@@ -32,5 +32,8 @@ funreg: all
 xor: all
 	make -C tests/ xor
 
+letter: all
+	make -C tests/ letter
+
 debug: all
 	make -C tests/ debug

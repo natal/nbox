@@ -33,7 +33,7 @@
 
 double paraboloid (double x)
 {
-    return  -0.2 * x * x + x + 1;
+    return (sin (x) + 1.) * 0.5;
 }
 
 int main (int argc, char** argv)
@@ -74,14 +74,10 @@ int main (int argc, char** argv)
         double* inputs = new double[icount];
         double* outputs = new double[ocount];
 
-        double errors[101] = {0.};
-        double* err_it = errors;
-
-        double nb_iter = 100.;
-        double delta = 1. / nb_iter;
+        double nb_iter = 5000.;
+        double delta = 1. / (2 * nb_iter);
         for (unsigned iter = 0; iter < nb_iter; ++iter)
         {
-            err_it = errors;
             double acc_err = 0.;
             for (double x = -10.; x - 10. <= 0; x += 0.2f)
             {
@@ -89,17 +85,28 @@ int main (int argc, char** argv)
                 network->interpolate (outputs, inputs);
                 double val = paraboloid (x);
                 double err = val - outputs[0];
-                // *err_it = err;
                 err *= err;
-                // fs_plot_res << x << " " << outputs[0] << std::endl;
-                network->train (&val, inputs);
-                // fs_plot_fun << x << " " << val << std::endl;
+                acc_err += err;
             }
 
-            err_it = errors;
             acc_err /= 101.;
             fs_plot_err << iter << " " << acc_err << std::endl;
             network->adjust_rate (delta);
+
+            for (double x = -10.; x - 10. <= 0; x += 0.2f)
+            {
+                inputs[0] = x;
+                double val = paraboloid (x);
+                network->train_bp (&val, inputs);
+            }
+        }
+
+        for (double x = -10.; x - 10. <= 0; x += 0.2f)
+        {
+            inputs[0] = x;
+            network->interpolate (outputs, inputs);
+            fs_plot_res << x << " " << outputs[0] << std::endl;
+            fs_plot_fun << x << " " << paraboloid (x) << std::endl;
         }
 
         fs_plot_err.close ();

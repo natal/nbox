@@ -99,7 +99,7 @@ void Network::build_perceptron_ (neuralMap& neural_map,
       cur->mark ();
       if (!cur_cell->size ())
       {
-          // cur->make_linear ();
+         // cur->make_linear ();
           outputs_.push_back (cur);
           return;
       }
