@@ -1,27 +1,3 @@
-
-/* Interface code for dealing with text properties.
-   Copyright (C) 2011-2012
-   Free Software Foundation, Inc.
-
-   This file is part of nbox.
-
-   nbox is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   nbox is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with nbox; see the file COPYING.
-   If not, see <http://www.gnu.org/licenses/>.  */
-
-
-/* This file is for testing purposes only */
-
 #include <iostream>
 #include "../../src/headers/network.hh"
 #include "../../src/headers/activ_fun.hh"
@@ -31,10 +7,11 @@
 #include <string>
 #include <stack>
 
-double paraboloid (double x)
+double xor_fun (int x, int y)
 {
-    return  -0.2 * x * x + x + 1;
+    return  (double)(x != y);
 }
+
 
 int main (int argc, char** argv)
 {
@@ -44,7 +21,7 @@ int main (int argc, char** argv)
     MapParser parser;
     std::cout << std::endl;
     std::cout << "Function learning test program" << std::endl;
-    std::cout << "Learning curve: polynomial" << std::endl;
+    std::cout << "Learning xor" << std::endl;
     std::cout << std::endl;
 
     try
@@ -52,59 +29,76 @@ int main (int argc, char** argv)
         parser.parse_file (argv[1]);
         Network* network = parser.retrieve_network ();
         std::ofstream fs_plot_err;
-        std::ofstream fs_plot_res;
-        std::ofstream fs_plot_fun;
 
         fs_plot_err.open ("err_surf.data");
-        fs_plot_res.open ("res_surf.data");
-        fs_plot_fun.open ("fun_surf.data");
 
 
         size_t icount = network->inputs_count ();
         size_t ocount = network->outputs_count ();
 
-        if (icount != 1 && ocount != 1)
+        if (icount != 2 && ocount != 1)
         {
             std::cout << std::endl <<
                 "WARNING : the provided neural map must" <<
-                " have 1 input and one output." << std::endl;
+                " have 2 inputs and one output." << std::endl;
             std::cout << std::endl;
         }
 
         double* inputs = new double[icount];
         double* outputs = new double[ocount];
 
-        double errors[101] = {0.};
-        double* err_it = errors;
+        double nb_iter = 10000.;
+        double delta = 1. / (nb_iter);
 
-        double nb_iter = 100.;
-        double delta = 1. / nb_iter;
         for (unsigned iter = 0; iter < nb_iter; ++iter)
         {
-            err_it = errors;
             double acc_err = 0.;
-            for (double x = -10.; x - 10. <= 0; x += 0.2f)
+            for (int x = 0; x <= 1; x++)
             {
-                inputs[0] = x;
-                network->interpolate (outputs, inputs);
-                double val = paraboloid (x);
-                double err = val - outputs[0];
-                // *err_it = err;
-                err *= err;
-                // fs_plot_res << x << " " << outputs[0] << std::endl;
-                network->train (&val, inputs);
-                // fs_plot_fun << x << " " << val << std::endl;
+                for (int y = 0; y <= 1; y++)
+                {
+                    inputs[0] = x;
+                    inputs[1] = y;
+                    network->interpolate (outputs, inputs);
+                    double val = xor_fun (x, y);
+                    double err = val - outputs[0];
+                    err *= err;
+                    acc_err += err;
+                }
             }
 
-            err_it = errors;
             acc_err /= 101.;
             fs_plot_err << iter << " " << acc_err << std::endl;
             network->adjust_rate (delta);
+
+            for (int x = 0; x <= 1; x++)
+            {
+                for (int y = 0; y <= 1; y++)
+                {
+                    inputs[0] = x;
+                    inputs[1] = y;
+                    double val = xor_fun (x, y);
+                    network->train_bp (&val, inputs);
+                }
+            }
+
+        }
+        std::cout << "Network trained" << std::endl;
+        std::cout << std::endl;
+
+        for (int x = 0; x <= 1; x++)
+        {
+            for (int y = 0; y <= 1; y++)
+            {
+                inputs[0] = x;
+                inputs[1] = y;
+                network->interpolate (outputs, inputs);
+                std::cout << x << " xor " << y << " = ";
+                std::cout << outputs[0] << " (" << xor_fun (x, y) << ") "<< std::endl;
+            }
         }
 
         fs_plot_err.close ();
-        fs_plot_res.close ();
-        fs_plot_fun.close ();
 
         char choice = 'n';
 

@@ -29,5 +29,8 @@ simple: all
 funreg: all
 	make -C tests/ funreg
 
+xor: all
+	make -C tests/ xor
+
 debug: all
 	make -C tests/ debug

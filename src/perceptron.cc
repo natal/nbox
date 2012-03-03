@@ -244,6 +244,72 @@ void Perceptron::adjust_weights (std::queue<Perceptron*>& queue)
   }
 }
 
+void Perceptron::backpropagate (std::queue<Perceptron*>& queue, double out_err)
+{
+    local_err_ = out_err * d_transfer_func_ (action_potential_);
+    // weight adjustment
+    std::vector<axon*>::iterator in_it = inputs_.begin ();
+
+    double scaled_err = learning_rate_ * local_err_;
+
+    for (; in_it != inputs_.end (); in_it++)
+    {
+        Perceptron* sender = (*in_it)->sender_get ();
+        double delta_weight = scaled_err * sender->activation_val_;
+        (*in_it)->weight_adjust (delta_weight) ;
+    }
+
+    // width-first propagation
+    in_it = inputs_.begin ();
+    for (; in_it != inputs_.end (); in_it++)
+    {
+        Perceptron* sender = (*in_it)->sender_get ();
+        if (!sender->marked_)
+        {
+            queue.push (sender);
+            sender->mark ();
+        }
+    }
+}
+
+void Perceptron::backpropagate (std::queue<Perceptron*>& queue)
+{
+    std::vector<axon*>::iterator out_it = outputs_.begin ();
+    local_err_ = 0.;
+    // std::cout << "Local error in neuron " << index_ << std::endl;
+    for (; out_it != outputs_.end (); out_it++)
+    {
+        Perceptron* next = (*out_it)->receiver_get ();
+        local_err_ += (*out_it)->weight_get () * next->local_err_;
+    }
+    double res_d = d_transfer_func_ (action_potential_);
+    local_err_ *= res_d;
+
+    // weight adjustment
+    std::vector<axon*>::iterator in_it = inputs_.begin ();
+
+    double scaled_err = learning_rate_ * local_err_;
+
+    for (; in_it != inputs_.end (); in_it++)
+    {
+        Perceptron* sender = (*in_it)->sender_get ();
+        double delta_weight = scaled_err * sender->activation_val_;
+        (*in_it)->weight_adjust (delta_weight) ;
+    }
+
+    // width-first propagation
+    in_it = inputs_.begin ();
+    for (; in_it != inputs_.end (); in_it++)
+    {
+        Perceptron* sender = (*in_it)->sender_get ();
+        if (!sender->marked_)
+        {
+            queue.push (sender);
+            sender->mark ();
+        }
+    }
+}
+
 void Perceptron::adjust_rate (double delta)
 {
     learning_rate_ -= delta;

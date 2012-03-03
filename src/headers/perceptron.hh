@@ -41,7 +41,7 @@
 
 # define RAND_MOD 64
 # define RAND_MOD_2 32
-# define RAND_RANGE 0.1
+# define RAND_RANGE 5.0
 # define RAND_MIN 0.0001
 
 class Perceptron
@@ -111,6 +111,8 @@ class Perceptron
     void propagate_err (std::queue<Perceptron*>& queue);
     void propagate_err (std::queue<Perceptron*>& queue, double out_err);
     void adjust_weights (std::queue<Perceptron*>& queue);
+    void backpropagate (std::queue<Perceptron*>& queue);
+    void backpropagate (std::queue<Perceptron*>& queue, double out_err);
     void local_err_set (double err);
     void make_linear ();
 

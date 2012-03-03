@@ -99,7 +99,7 @@ void Network::build_perceptron_ (neuralMap& neural_map,
       cur->mark ();
       if (!cur_cell->size ())
       {
-          cur->make_linear ();
+          // cur->make_linear ();
           outputs_.push_back (cur);
           return;
       }
@@ -147,6 +147,48 @@ void Network::interpolate (double* outputs, const double* inputs)
   std::vector<Perceptron*>::iterator out_it = outputs_.begin ();
   for (; out_it != outputs_.end(); out_it++, out_ptr++)
     *out_ptr = (*out_it)->measure_av ();
+}
+
+void Network::train (const double* error)
+{
+    const double* err_ptr = error;
+
+    std::queue<Perceptron*> e_queue; // queue used for error propagation
+    std::queue<Perceptron*> w_queue; // queue used for weight adjustment
+
+    unmark_network_ ();
+
+    /****************  ERROR BACKPROPAGATION  **********************************/
+    std::vector<Perceptron*>::iterator out_it = outputs_.begin ();
+    for (; out_it != outputs_.end(); out_it++, err_ptr++)
+        (*out_it)->propagate_err (e_queue, *err_ptr);
+
+    // Backpropagate error using a width-first traversal of the
+    // neural map
+    while (!e_queue.empty ())
+    {
+        Perceptron* front = e_queue.front ();
+        e_queue.pop ();
+        front->propagate_err (e_queue);
+    }
+
+    unmark_network_ ();
+
+    /****************  WEIGHT ADJUSTMENTS  *************************************/
+    std::vector<Perceptron*>::iterator in_it = inputs_.begin ();
+
+    for (in_it = inputs_.begin (); in_it != inputs_.end (); in_it++)
+        w_queue.push (*in_it);
+
+    // weight adjustments requires a width-first traversal of the map
+    // A queue is used for that
+
+    while (!w_queue.empty ())
+    {
+        Perceptron* front = w_queue.front ();
+        w_queue.pop ();
+        front->adjust_weights (w_queue);
+    }
 }
 
 void Network::train (double* desired_outputs, const double* inputs)
@@ -200,6 +242,36 @@ void Network::train (double* desired_outputs, const double* inputs)
   /***************************************************************************/
 
   delete[] outputs;
+}
+
+void Network::train_bp (double* desired_outputs, const double* inputs)
+{
+    double* outputs = new double[outputs_.size ()];
+    double* out_ptr = outputs;
+    double* des_ptr = desired_outputs;
+
+    interpolate (outputs, inputs);
+
+    std::queue<Perceptron*> queue; // queue used for back propagation
+    unmark_network_ ();
+
+ /****************  ERROR BACKPROPAGATION  **********************************/
+ /**/std::vector<Perceptron*>::iterator out_it = outputs_.begin ();
+ /**/for (; out_it != outputs_.end(); out_it++, des_ptr++, out_ptr++)
+ /**/{
+ /**/   double local_err = *des_ptr - *out_ptr;
+ /**/   (*out_it)->backpropagate (queue, local_err);
+ /**/}
+ /**/ // Backpropagate error using a width-first traversal of the
+ /**/ // neural map
+ /**/while (!queue.empty ())
+ /**/{
+ /**/   Perceptron* front = queue.front ();
+ /**/   queue.pop ();
+ /**/   front->backpropagate (queue);
+ /**/}
+ /**/
+ /***************************************************************************/
 }
 
 void Network::dotify (std::ofstream& fs)

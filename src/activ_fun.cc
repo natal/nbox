@@ -26,7 +26,7 @@ double abs (double x)
     return x < 0 ? -x : x;
 }
 
-#define MAX_X 100
+#define MAX_X 500
 
 double sigmoid (double x)
 {

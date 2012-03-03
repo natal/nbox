@@ -15,6 +15,10 @@ funreg:
 	make -C src/ funreg
 	LD_LIBRARY_PATH='../' ./${BIN} map-samples/map2.nm
 
+xor:
+	make -C src/ xor
+	LD_LIBRARY_PATH='../' ./${BIN} map-samples/xormap.nm
+
 exec: all
 	LD_LIBRARY_PATH='../' ./${BIN} map-samples/map3.nm
 

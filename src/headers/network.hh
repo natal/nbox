@@ -49,6 +49,8 @@ class Network
  /*   void interpolate (std::vector<double>& outputs,
                       const std::vector<double>& inputs); */
     void train (double* desired_outputs, const double* inputs);
+    void train (const double* error);
+    void train_bp (double* desired_outputs, const double* inputs);
     void adjust_rate (double delta);
     void dotify (std::ofstream& fs);
     void dotify_back (std::ofstream& fs);

@@ -24,7 +24,7 @@
 
 # include "channel.hh"
 
-# define MAX_WEIGHT 1.
+# define MAX_WEIGHT 100.
 # define MIN_WEIGHT 0.0001
 
 template <typename S, typename R, typename M>
