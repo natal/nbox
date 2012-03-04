@@ -26,28 +26,76 @@ WeightParser::WeightParser (Network* network)
 {
 }
 
+// Hardcoded automata : -?[1-9]+(.[1-9])?(e-?[1-9]+)?
+const char* lex_number (const char* line)
+{
+    const char* it = line;
+
+    while (*it == ' ')
+        it++;
+
+    if (*it == '-')
+        it++;
+
+    size_t delta = 0;
+    while (*it >= '0' && *it <= '9')
+    {
+        it++;
+        delta++;
+    }
+
+    if (delta && *it == '.')
+    {
+        it++;
+        while (*it >= '0' && *it <= '9')
+            it++;
+    }
+
+    if (delta && (*it == 'e' || *it == 'E'))
+    {
+        it++;
+        if (*it == '-')
+            it++;
+        delta = 0;
+        while (*it >= '0' && *it <= '9')
+        {
+            it++;
+            delta++;
+        }
+        if (!delta)
+            it--;
+    }
+    return it;
+}
+
 void WeightParser::parse_line_ (const char* line, size_t len, size_t line_nb)
 {
     const char sequence[3] = {'(', ',', ')'};
     const char* it = sequence;
     double vals[3] = {0.};
     double* it_v = vals;
-    for (size_t i = 0; i < len; i++, line++)
+    const char* line_pos = line;
+    for (size_t i = 0; i < len; i++)
     {
-        if (*line != ' ')
+        if (*line_pos != ' ')
         {
-            if (*line != *it)
+            if (*line_pos != *it)
             {
                 std::stringstream sstream (std::stringstream::in | std::stringstream::out);
-                sstream << "unexpected '" << *line << "' at line " << line_nb;
+                sstream << "unexpected '" << *line_pos << "' at line " << line_nb;
+                sstream << " character " << (i + 1);
                 throw SyntaxErrorException (sstream.str ());
             }
-            std::stringstream sstream (std::stringstream::in | std::stringstream::out);
-            sstream << line;
-            sstream >> *it_v;
+            line_pos++;
+            const char* p = lex_number (line_pos);
+            *it_v = atof (line_pos);
             it_v++;
+            line_pos = p;
+            i = (p - line);
             it++;
         }
+        else
+            line_pos++;
     }
     network_->weight_set (vals[0], vals[1], vals[2]);
 }

@@ -35,9 +35,9 @@
 # include <string>
 # include <cstring>
 
-# define MSG_MAX_LENGTH 200
+# define MSG_MAX_LENGTH 1000
 
-class UnknownTokenException: std::exception
+class UnknownTokenException: public std::exception
 {
   public:
     virtual const char* what () const throw ()
@@ -46,25 +46,51 @@ class UnknownTokenException: std::exception
     }
 };
 
-class SyntaxErrorException: std::exception
+class NoLinkException: public std::exception
 {
+  private:
+      int p1_;
+      int p2_;
+      double val_;
   public:
-    SyntaxErrorException (std::string msg)
+    NoLinkException (int p1, int p2, double val)
+        : p1_ (p1), p2_ (p2), val_ (val)
     {
-        strncpy (msg_, msg.c_str (), msg.length ());
     }
 
     virtual const char* what () const throw ()
     {
-      std::string m = "Syntax error: ";
-      m += msg_;
-      return m.c_str ();
+      std::stringstream sstream;
+      sstream << "Weight loading error : Could not set weight " << val_
+              << " on synapse from P" << p1_
+               << " to P"<< p2_ << std::endl;
+      return sstream.str ().c_str ();
+    }
+};
+
+class SyntaxErrorException: public std::exception
+{
+  public:
+    SyntaxErrorException (std::string msg)
+    {
+
+        std::string m = "Syntax error: ";
+        msg = m + msg;
+        size_t len = msg.length ();
+        len = len > MSG_MAX_LENGTH ? MSG_MAX_LENGTH : len;
+        strncpy (msg_, msg.c_str (), len);
+        msg_[len] = '\0';
+    }
+
+    virtual const char* what () const throw ()
+    {
+      return msg_;
     }
   private:
       char msg_[MSG_MAX_LENGTH];
 };
 
-class NoPerceptronException: std::exception
+class NoPerceptronException: public std::exception
 {
   public:
     NoPerceptronException (unsigned id)

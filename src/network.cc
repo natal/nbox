@@ -373,5 +373,7 @@ void Network::weight_set (unsigned p1, unsigned p2, double val)
 {
     synapse s (p1, p2);
     Perceptron::axon* a = synapses_[s];
+    if (!a)
+        throw NoLinkException (p1, p2, val);
     a->weight_set (val);
 }

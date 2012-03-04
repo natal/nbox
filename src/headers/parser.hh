@@ -31,6 +31,7 @@
 # include <cassert>
 # include <sstream>
 # include <fstream>
+# include <cstring>
 # include "network.hh"
 # include "exceptions.hh"
 

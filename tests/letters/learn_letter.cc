@@ -31,7 +31,6 @@ int main (int argc, char** argv)
     std::cout << std::endl;
     std::cout << "Letter learning test program" << std::endl;
     std::cout << std::endl;
-
     try
     {
         parser.parse_file (argv[1]);
