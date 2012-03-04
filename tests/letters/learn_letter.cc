@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <stack>
+#include <ctime>
 
 #define MAX_ITER 10000
 #define MAX_TEST 100
@@ -23,6 +24,8 @@ int main (int argc, char** argv)
 {
     if (argc < 1)
         return 1;
+
+    srand (time (NULL));
 
     MapParser parser;
     std::cout << std::endl;
@@ -72,38 +75,60 @@ int main (int argc, char** argv)
             std::cout << std::endl;
         }
 
-        double label1 = 1;
-        double label2 = 0;
+        double label1 = 1.;
+        double label2 = 0.;
 
         double* inputs_l = new double[icount];
         double* inputs_b = new double[icount];
 
-        double cur_val_l = 0.;
-        double cur_val_b = 0.;
-        size_t comp = 0;
-        size_t nb_vec = 0.;
-        unsigned max_samples = nbl_letters;
+
+        std::cout << "Learning from " << nbl_letters << " letter samples" << std::endl;
+        std::cout << "Learning from " << nbl_bg << " backg samples" << std::endl;
 
         // Learning phase
 
-        double delta_rate = 1. / (2 * (double)max_samples);
-        while (fs_background >> cur_val_b && fs_letters >> cur_val_l
-               && max_samples > 0)
+
+
+        for (size_t iter = 0; iter < 200; iter++)
         {
-            inputs_l[comp] = cur_val_l;
-            inputs_b[comp++] = cur_val_b;
-            if (comp >= vec_size)
+            double cur_val_l = 0.;
+            double cur_val_b = 0.;
+            size_t comp = 0;
+            size_t nb_vec = 0.;
+            unsigned max_samples = nbl_letters + nbl_bg;
+            double delta_rate = 1. / (400 * (double)max_samples);
+            size_t old_progress = -1;
+
+            while (fs_background >> cur_val_b && fs_letters >> cur_val_l
+                    && max_samples > 0)
             {
-                network->train_bp (&label1, inputs_l);
-                network->train_bp (&label2, inputs_b);
-                nb_vec++;
-                comp = 0;
-                max_samples--;
-                network->adjust_rate (delta_rate);
+                inputs_l[comp] = cur_val_l;
+                inputs_b[comp++] = cur_val_b;
+                if (comp >= vec_size)
+                {
+                    network->train_bp (&label1, inputs_l);
+                    network->train_bp (&label2, inputs_b);
+                    nb_vec += 2;
+                    comp = 0;
+                    max_samples--;
+                    network->adjust_rate (delta_rate);
+                    size_t progress = (size_t)(((double)nb_vec * 50.) / (double)nbl_letters);
+                    if (progress != old_progress)
+                    {
+                        std::cout << progress << "% done on epoch no " << iter << std::endl;
+                        old_progress = progress;
+                    }
+                }
             }
+            std::cout << "Learned from " << nb_vec << " samples" << std::endl;
+            std::cout << (double)iter * 100. / 200. << "% epoch done" << std::endl;
+
+            fs_letters.close ();
+            fs_background.close ();
+            fs_letters.open ("letters/lettre.nbox");
+            fs_background.open ("letters/fond.nbox");
         }
 
-        std::cout << "Learned from " << nb_vec << " samples" << std::endl;
 
         test_network (network);
 
@@ -217,6 +242,7 @@ void test_network (Network* network)
         }
 
         std::cout << "Tested " << nb_tests << " samples" << std::endl;
+        std::cout << "\nSucceeded on : " << success << " tests" << std::endl;
 
         std::cout << "Success rate : " << ((double)success * 100.) / (double)nb_tests << "%" << std::endl;
         fs_letters.close ();

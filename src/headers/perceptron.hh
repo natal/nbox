@@ -67,7 +67,7 @@ class Perceptron
     ** @brief connect the perceptron to another.
     ** @param out the perceptron to connect to
     */
-    void connect_to (Perceptron* out);
+    axon* connect_to (Perceptron* out);
 
     /**
     ** @brief activate the neuron and transmit the neural message
@@ -83,7 +83,7 @@ class Perceptron
 
     void dotify (std::ofstream& fs);
     void dotify_back (std::ofstream& fs);
-    int get_index ();
+    int index_get ();
     void adjust_rate (double delta);
 
     // Marking mecanism

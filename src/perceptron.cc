@@ -61,7 +61,7 @@ Perceptron::~Perceptron ()
   outputs_.clear ();
 }
 
-void Perceptron::connect_to (Perceptron* out)
+Perceptron::axon* Perceptron::connect_to (Perceptron* out)
 {
   // double allocation for easy destruction
 
@@ -70,9 +70,10 @@ void Perceptron::connect_to (Perceptron* out)
   axon* new_axon = new axon (this, out, 1.0, rand_weight);
   out->inputs_.push_back (new_axon);
   outputs_.push_back (new_axon);
+  return new_axon;
 }
 
-int Perceptron::get_index ()
+int Perceptron::index_get ()
 {
   return index_;
 }

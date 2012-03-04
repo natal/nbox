@@ -23,6 +23,7 @@
 
 Network::Network ()
   : perceptrons_ (),
+    synapses_ (),
     inputs_ (),
     outputs_ (),
     learning_rate_ (1.)
@@ -31,6 +32,7 @@ Network::Network ()
 
 Network::Network (std::vector<unsigned>& first_layer, neuralMap& neural_map)
   : perceptrons_ (),
+    synapses_ (),
     inputs_ (),
     outputs_ (),
     learning_rate_ (1.)
@@ -110,7 +112,12 @@ void Network::build_perceptron_ (neuralMap& neural_map,
               throw NoPerceptronException (*it);
 
           Perceptron* next = perceptrons_[*it];
-          cur->connect_to (next);
+
+          Perceptron::axon* a = cur->connect_to (next);
+          synapse s (cur->index_get (), *it);
+          std::pair<synapse, Perceptron::axon*> p (s, a);
+          synapses_.insert (p);
+
           if (!next->is_marked ())
           {
               build_perceptron_ (neural_map, *it, next);
@@ -288,6 +295,52 @@ void Network::dotify_back (std::ofstream& fs)
     (*it)->dotify_back (fs);
 }
 
+void Network::dotify (const char* file)
+{
+    std::ofstream fs;
+    fs.precision(7);
+    fs << std::fixed;
+    fs.open (file);
+    fs << "digraph \"neural map\"" << std::endl;
+    fs << "{" << std::endl;
+    std::vector<Perceptron*>::iterator it = perceptrons_.begin ();
+    for (; it != perceptrons_.end (); it++)
+        (*it)->dotify (fs);
+    fs << "}" << std::endl;
+    fs.close ();
+}
+
+void Network::dotify_back (const char* file)
+{
+    std::ofstream fs;
+    fs.precision(7);
+    fs << std::fixed;
+    fs.open (file);
+    fs << "digraph \"neural map\"" << std::endl;
+    fs << "{" << std::endl;
+    std::vector<Perceptron*>::iterator it = perceptrons_.begin ();
+    for (; it != perceptrons_.end (); it++)
+        (*it)->dotify_back (fs);
+    fs << "}" << std::endl;
+    fs.close ();
+}
+
+void Network::save_weights (const char* file)
+{
+    std::ofstream fs;
+    fs.open (file);
+    std::map<synapse, Perceptron::axon*>::iterator it = synapses_.begin ();
+    for (; it != synapses_.end (); it++)
+    {
+        Perceptron* sender = (*it).second->sender_get ();
+        Perceptron* receiver = (*it).second->receiver_get ();
+        fs << "( " << sender->index_get () << " , "
+           << receiver->index_get () << " ) "
+           << (*it).second->weight_get () << std::endl;
+    }
+    fs.close ();
+}
+
 void Network::learning_rate_set (double lr)
 {
   learning_rate_ = lr;
@@ -314,4 +367,11 @@ void Network::adjust_rate (double delta)
     std::vector<Perceptron*>::iterator it = perceptrons_.begin ();
     for (; it != perceptrons_.end (); it++)
         (*it)->adjust_rate (delta);
+}
+
+void Network::weight_set (unsigned p1, unsigned p2, double val)
+{
+    synapse s (p1, p2);
+    Perceptron::axon* a = synapses_[s];
+    a->weight_set (val);
 }

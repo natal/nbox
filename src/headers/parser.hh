@@ -43,10 +43,10 @@ class MapParser
     ~MapParser ();
     void parse_file (const char* file);
     Network* retrieve_network ();
-    void parse_neuron (const char* line);
-    void parse_input (const char* line);
 
   private:
+    void parse_neuron_ (const char* line);
+    void parse_input_ (const char* line);
     neuralMap neural_map_;
     std::vector<unsigned> first_layer_;
     char to_lower_ (char c);
@@ -68,6 +68,16 @@ class MapParser
     };
     void next_command_ (const char* line, size_t size);
     TkInfo tk_info[NB_TOKENS];
+};
+
+class WeightParser
+{
+    public:
+        WeightParser (Network* network);
+        void load_weights (const char* file);
+    private:
+        void parse_line_ (const char* line, size_t len, size_t line_nb);
+        Network* network_;
 };
 
 #endif /* !PARSER_HH_ */

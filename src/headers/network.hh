@@ -30,8 +30,10 @@
 # include "perceptron.hh"
 # include "exceptions.hh"
 # include <fstream>
+# include <map>
 
 typedef std::pair<size_t, size_t> cell;
+typedef std::pair<size_t, size_t> synapse;
 typedef std::vector<std::vector<unsigned>*> neuralMap;
 
 class Network
@@ -52,15 +54,23 @@ class Network
     void train (const double* error);
     void train_bp (double* desired_outputs, const double* inputs);
     void adjust_rate (double delta);
+
     void dotify (std::ofstream& fs);
     void dotify_back (std::ofstream& fs);
+    void dotify (const char* path);
+    void dotify_back (const char* path);
+
+    void save_weights (const char* file_path);
+
     void learning_rate_set (double lr);
     double learning_rate_get ();
     size_t inputs_count ();
     size_t outputs_count ();
+    void weight_set (unsigned p1, unsigned p2, double val);
 
   private:
     std::vector<Perceptron*> perceptrons_;
+    std::map<synapse, Perceptron::axon*> synapses_;
     std::vector<Perceptron*> inputs_;
     std::vector<Perceptron*> outputs_;
     void initialize_network_ (std::vector<unsigned>& first_layer, neuralMap& neural_map);

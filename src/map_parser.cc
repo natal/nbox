@@ -24,8 +24,8 @@
 
 MapParser::MapParser ()
 {
-  tk_info[0] = TkInfo (&MapParser::parse_input, "input");
-  tk_info[1] = TkInfo (&MapParser::parse_neuron, "neuron");
+  tk_info[0] = TkInfo (&MapParser::parse_input_, "input");
+  tk_info[1] = TkInfo (&MapParser::parse_neuron_, "neuron");
 }
 
 MapParser::~MapParser ()
@@ -56,7 +56,7 @@ char MapParser::to_lower_ (char c)
   return c;
 }
 
-void MapParser::parse_neuron (const char* line)
+void MapParser::parse_neuron_ (const char* line)
 {
   std::stringstream sstream (std::stringstream::in | std::stringstream::out);
 
@@ -70,10 +70,10 @@ void MapParser::parse_neuron (const char* line)
     cur_neuron->push_back (next);
 }
 
-void MapParser::parse_input (const char* line)
+void MapParser::parse_input_ (const char* line)
 {
   first_layer_.push_back (neural_map_.size ());
-  parse_neuron (line);
+  parse_neuron_ (line);
 }
 
 void MapParser::next_command_ (const char* line, size_t size)

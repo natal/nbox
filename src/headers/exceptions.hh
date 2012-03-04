@@ -33,6 +33,9 @@
 # include <exception>
 # include <sstream>
 # include <string>
+# include <cstring>
+
+# define MSG_MAX_LENGTH 200
 
 class UnknownTokenException: std::exception
 {
@@ -41,6 +44,24 @@ class UnknownTokenException: std::exception
     {
       return "Lexical error: Unknown token";
     }
+};
+
+class SyntaxErrorException: std::exception
+{
+  public:
+    SyntaxErrorException (std::string msg)
+    {
+        strncpy (msg_, msg.c_str (), msg.length ());
+    }
+
+    virtual const char* what () const throw ()
+    {
+      std::string m = "Syntax error: ";
+      m += msg_;
+      return m.c_str ();
+    }
+  private:
+      char msg_[MSG_MAX_LENGTH];
 };
 
 class NoPerceptronException: std::exception

@@ -1,3 +1,16 @@
+. Implement parsing of a "weight" file containing the value of the weights in the
+  network. This allows one to save a trained network and load it again.
+  The extension will be '.wt' and the grammar will be:
+       <expr> := <couple> <value>
+       <couple> := ( <index> , <index> )
+       <index> := Int
+       <value> := double
+. Write a general purpose program allowing one to learn any data
+  from a standard file.
+
+
+***********************************ARCHIVE******************************************
+
 . The error propagation needs verification. Use the formula given in Neural networks
   by Simon Haykin.
 

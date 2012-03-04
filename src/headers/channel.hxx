@@ -91,4 +91,10 @@ void Channel<S, R, M>::weight_adjust (double delta)
      */
 }
 
+template <typename S, typename R, typename M>
+void Channel<S, R, M>::weight_set (double val)
+{
+  weight_ = val;
+}
+
 #endif /* !CHANNEL_HH_ */

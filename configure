@@ -4,7 +4,7 @@ echo 'SRCFR=fun_reg.cc' >> Makefile.rules
 echo 'SRCSIM=simple.cc' >> Makefile.rules
 echo 'SRCXOR=xor.cc' >> Makefile.rules
 echo 'SRCLET=learn_letter.cc' >> Makefile.rules
-echo 'LIBSRC=network.cc perceptron.cc parser.cc activ_fun.cc' >> Makefile.rules
+echo 'LIBSRC=network.cc perceptron.cc wt_parser.cc map_parser.cc activ_fun.cc' >> Makefile.rules
 echo 'OBJFR=$(SRCFR:.cc=.o)' >> Makefile.rules
 echo 'OBJSIM=$(SRCSIM:.cc=.o)' >> Makefile.rules
 echo 'OBJXOR=$(SRCXOR:.cc=.o)' >> Makefile.rules
