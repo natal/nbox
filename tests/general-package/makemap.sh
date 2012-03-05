@@ -10,7 +10,6 @@ fi
 ITERATOR=$#
 NEXT=0
 NAME="INPUT"
-COUNT=0
 NEXT="$(( $1 ))"
 
 while test $ITERATOR -gt 1; do
@@ -27,15 +26,13 @@ while test $ITERATOR -gt 1; do
     ITERATOR=$(( $ITERATOR - 1))
 
     while test $NEURON_START -lt $NEURON_END; do
-        echo "$COUNT ${NAME}${LINKS}"
-        COUNT=$(( $COUNT + 1 ))
+        echo "${NAME}${LINKS}"
         NEURON_START=$(( $NEURON_START + 1))
     done
 
     NAME="NEURON"
 
-    echo "$COUNT ${NAME}${LINKS}"
-    COUNT=$(( $COUNT + 1 ))
+    echo "${NAME}${LINKS}"
 
     shift
 done
@@ -46,8 +43,7 @@ NEURON_START=$NEXT
 NEURON_END=$(( $NEXT + $1 ))
 
 while test $NEURON_START -lt $NEURON_END; do
-    echo "$COUNT NEURON"
+    echo "NEURON"
     NEURON_START=$(($NEURON_START + 1))
-    COUNT=$(( $COUNT + 1 ))
 done
 
