@@ -120,7 +120,7 @@ int main (int argc, char** argv)
                 }
             }
             std::cout << "Learned from " << nb_vec << " samples" << std::endl;
-            std::cout << (double)iter * 100. / 200. << "% epoch done" << std::endl;
+            std::cout << (size_t)iter * 0.5f << "% epoch done" << std::endl;
 
             fs_letters.close ();
             fs_background.close ();
@@ -128,6 +128,7 @@ int main (int argc, char** argv)
             fs_background.open ("letters/fond.nbox");
         }
 
+        network->save_weights ("weights.wt");
 
         test_network (network);
 
