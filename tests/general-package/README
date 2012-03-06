@@ -38,6 +38,9 @@ library. All you have to do is follow these simple instructions:
   for example:
 
 ******************************* data.nbox **********************************
+*3                                                                         *
+*2                                                                         *
+*2                                                                         *
 *1 0.3 0.4e10                                                              *
 *3 4                                                                       *
 *2 1 0.1e2                                                                 *

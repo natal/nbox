@@ -35,7 +35,7 @@
 # include "network.hh"
 # include "exceptions.hh"
 
-# define NB_TOKENS 2
+#define NB_TOKENS 2
 
 class MapParser
 {

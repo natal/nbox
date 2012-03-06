@@ -1,9 +1,9 @@
 include ../../Makefile.rules
 include learning.config
 
-all: ${OBJLEARN}
+all: ${OBJTEST} ${OBJLEARN}
 	${CC} -L../../ -l${LIB} ${BINFLAGS} -o ${BINLEARN} ${OBJLEARN}
-	#${CC} -L../../ -l${LIB} ${BINFLAGS} -o ${BINTEST} ${OBJTEST}
+	${CC} -L../../ -l${LIB} ${BINFLAGS} -o ${BINTEST} ${OBJTEST}
 
 %.o:
 	${CC} ${BINFLAGS} -c $(@:.o=.cc)

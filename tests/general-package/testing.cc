@@ -7,8 +7,11 @@
 #include <string>
 #include <stack>
 #include <ctime>
+#include <cstring>
 
+#define MAX_MSG_LENGTH 1000
 #define THRESHOLD(val) (val >= 0.5 ? 1. : 0.)
+#define MIN(a,b) (a > b ? b : a)
 
 class OptionErrorException: public std::exception
 {
@@ -67,9 +70,9 @@ static void check_io_sizes (size_t file_in,
     }
 }
 
-static double sqme        (double* a,
-        double* b,
-        size_t l)
+static double sqme (double* a,
+                    double* b,
+                    size_t l)
 {
     double length = 0;
     for (size_t i = 0; i < l; i++)
@@ -119,6 +122,9 @@ int main (int argc, char** argv)
 
         check_io_sizes (in_size, out_size, icount, ocount);
 
+        WeightParser w_parser (network);
+        w_parser.load_weights (argv[3]);
+
         double* inputs = new double[icount];
         double* labels = new double[ocount];
         double* outputs = new double[ocount];
@@ -150,7 +156,7 @@ int main (int argc, char** argv)
                 if (io)
                 {
                     network->interpolate (outputs, inputs);
-                    square_mean_err += sqme (labels, outputs);
+                    square_mean_err += sqme (labels, outputs, ocount);
                     eff_nb_data++;
                     nb_samples--;
                 }
@@ -165,8 +171,7 @@ int main (int argc, char** argv)
             << eff_nb_data << " samples"
             << std::endl;
 
-        std::cout << "Square mean error: " << std::endl;
-        std::cout << square_mean_err << std::endl;
+        std::cout << "Square mean error: " << square_mean_err << std::endl;
 
         fs_data.close ();
         delete[] inputs;
