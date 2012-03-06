@@ -8,92 +8,176 @@
 #include <stack>
 #include <ctime>
 
-#define MAX_ITER 10000
-#define THRESHOLD (val) (val >= 0.5 ? 1. : 0.)
+#define THRESHOLD(val) (val >= 0.5 ? 1. : 0.)
+
+class OptionErrorException: public std::exception
+{
+    public:
+        OptionErrorException (const char* error_msg)
+        {
+            std::string s(error_msg);
+            strncpy (msg_, s.c_str (), MIN (s.length (), MAX_MSG_LENGTH));
+        }
+        virtual const char* what () const throw ()
+        {
+            return msg_;
+        }
+    private:
+        char msg_[MAX_MSG_LENGTH];
+};
+
+static void check_opt (int argc, char** argv)
+{
+    std::stringstream sstream;
+    if (argc < 3 || (argv[1][0] != '-' && argv[1][1] != 'i'))
+    {
+        sstream << "Usage: ./test [test_data_file]"
+            << " [neural_map_file] [weight_output_file]"
+            << std::endl;
+        throw OptionErrorException (sstream.str ().c_str ());
+    }
+}
+
+static void check_io_sizes (size_t file_in,
+        size_t file_out,
+        size_t nn_in,
+        size_t nn_out)
+{
+
+    if (!file_in)
+        throw OptionErrorException ("Syntax Error: Data File, \
+                Not a valid input size");
+    if (!file_out)
+        throw OptionErrorException ("Syntax Error: Data File, \
+                Not a valid output size");
+    if (!nn_in)
+        throw OptionErrorException ("Syntax Error: Neural Map File, \
+                Not a valid input size");
+    if (!nn_out)
+        throw OptionErrorException ("Syntax Error: Neural Map File, \
+                Not a valid output size");
+    if (nn_in != file_in && nn_out != file_out)
+    {
+        std::stringstream sstream;
+        sstream << std::endl <<
+            "ERROR : the provided neural map must" <<
+            " have " << file_in << " inputs and " <<
+            file_out << " outputs." << std::endl;
+        throw OptionErrorException (sstream.str ().c_str ());
+    }
+}
+
+static double sqme        (double* a,
+        double* b,
+        size_t l)
+{
+    double length = 0;
+    for (size_t i = 0; i < l; i++)
+    {
+        double diff = b[i] - a[i];
+        length += diff * diff;
+    }
+    return length;
+}
 
 int main (int argc, char** argv)
 {
-}
 
-void test_network (Network* network)
-{
-        std::ifstream fs_letters;
-        std::ifstream fs_background;
-        fs_letters.open ("letters/lettre_test.nbox");
-        fs_background.open ("letters/fond_test.nbox");
+    srand (time (NULL));
 
-        if (!fs_letters.is_open () || !fs_background.is_open ())
+    MapParser parser;
+    std::cout << std::endl;
+    std::cout << "NBOX learning program" << std::endl;
+    std::cout << std::endl;
+    try
+    {
+        check_opt (argc, argv);
+
+        std::ifstream fs_data;
+        fs_data.open (argv[1]);
+        if (!fs_data.is_open ())
         {
-            std::cerr << "could not open test data" << std::endl;
-            return;
+            std::cerr << "Error: Could not open testing data" << std::endl;
+            return 1;
         }
 
-        size_t vec_size = 0;
-        size_t err = 0;
-        size_t nbl_letters = 0;
-        size_t nbl_bg = 0;
+        size_t in_size = 0;
+        size_t out_size = 0;
+        size_t max_samples = 0;
 
-        fs_letters >> vec_size;
-        fs_background >> err;
-        if (err - vec_size != 0)
-        {
-            std::cerr << "Vector sizes don't match in test data" << std::endl;
-            return;
-        }
+        fs_data >> in_size;
+        fs_data >> out_size;
+        fs_data >> max_samples;
 
-        fs_letters >> nbl_letters;
-        fs_background >> nbl_bg;
+        // Network building
+
+        parser.parse_file (argv[2]);
+        Network* network = parser.retrieve_network ();
 
         size_t icount = network->inputs_count ();
+        size_t ocount = network->outputs_count ();
 
-        double* inputs_l = new double[icount];
-        double* inputs_b = new double[icount];
+        check_io_sizes (in_size, out_size, icount, ocount);
 
-        double output = 0.;
+        double* inputs = new double[icount];
+        double* labels = new double[ocount];
+        double* outputs = new double[ocount];
 
-        double cur_val_l = 0.;
-        double cur_val_b = 0.;
-        size_t comp = 0;
-        double success = 0;
-        size_t nb_tests = 0;
-        unsigned max_samples = nbl_letters;
 
-        std::cout << "Testing on " << nbl_letters << " letter samples" << std::endl;
-        std::cout << "Testing on " << nbl_bg << " backg samples" << std::endl;
-        // testing phase letters
-        while (fs_letters >> cur_val_l && max_samples > 0)
+        std::cout << "Testing " << max_samples
+            << " samples" << std::endl;
+
+        // Learning phase
+
+        double cur_val = 0.;
+        size_t component = 0;
+        size_t eff_nb_data = 0.;
+        unsigned nb_samples = max_samples;
+        size_t vec_size[2] = {icount, ocount};
+        int io = 0;
+        double square_mean_err = 0.;
+
+        while (fs_data >> cur_val && nb_samples > 0)
         {
-            inputs_l[comp++] = cur_val_l;
-            if (comp >= vec_size)
+            if (!io)
+                inputs[component] = cur_val;
+            else
+                labels[component] = cur_val;
+            if (component >= vec_size[io])
             {
-                network->interpolate (&output, inputs_l);
-                success += threshold (output);
-                comp = 0;
-                max_samples--;
-                nb_tests++;
+                // if we've just finished to load an output,
+                // we're ready to train
+                if (io)
+                {
+                    network->interpolate (outputs, inputs);
+                    square_mean_err += sqme (labels, outputs);
+                    eff_nb_data++;
+                    nb_samples--;
+                }
+                // reinitialisation of vector
+                component = 0;
+                io = !io;
             }
         }
+        square_mean_err /= eff_nb_data;
 
-        comp = 0;
-        max_samples = nbl_bg;
+        std::cout << "Effectively tested "
+            << eff_nb_data << " samples"
+            << std::endl;
 
-        while (fs_background >> cur_val_b && max_samples > 0)
-        {
-            inputs_b[comp++] = cur_val_b;
-            if (comp >= vec_size)
-            {
-                network->interpolate (&output, inputs_b);
-                success += (1 - threshold (output));
-                comp = 0;
-                max_samples--;
-                nb_tests++;
-            }
-        }
+        std::cout << "Square mean error: " << std::endl;
+        std::cout << square_mean_err << std::endl;
 
-        std::cout << "Tested " << nb_tests << " samples" << std::endl;
-        std::cout << "\nSucceeded on : " << success << " tests" << std::endl;
+        fs_data.close ();
+        delete[] inputs;
+        delete[] labels;
+        delete[] outputs;
 
-        std::cout << "Success rate : " << ((double)success * 100.) / (double)nb_tests << "%" << std::endl;
-        fs_letters.close ();
-        fs_background.close ();
+    }
+    catch (std::exception& ex)
+    {
+        std::cerr << ex.what () << std::endl;
+        return 1;
+    }
+    return 0;
 }

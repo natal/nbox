@@ -1,0 +1,80 @@
+This package is provided so that you, user of NBOX, can perform
+learning without having to implement any program linked to the
+library. All you have to do is follow these simple instructions:
+
+1 Prepare your features (material from wich to learn).
+  Each feature is a vector, all features must have the
+  same dimension.
+
+2 Prepare your desired outputs for each feature. Each desired
+  output must also be a vector, all outputs must have the same
+  dimension. Note that the fromer dosen't have to match the
+  features' dimension.
+
+3 Write them into a file (You can call it data.nbox for instance)
+  according to the following format:
+
+******************************* data.nbox **********************************
+*n                                                                         *
+*m                                                                         *
+*l                                                                         *
+*<feature_0.x_0> <feature_0.x_1> ... <feature_0.x_n>                       *
+*<desired_0.x_0> <desired_0.x_1> ... <desired_0.x_m>                       *
+*<feature_1.x_0> <feature_1.x_1> ... <feature_1.x_n>                       *
+*<desired_1.x_0> <desired_1.x_1> ... <desired_1.x_m>                       *
+*  .                                                                       *
+*  .                                                                       *
+*  .                                                                       *
+*<feature_l.x_0> <feature_l.x_1> ... <feature_l.x_n>                       *
+*<desired_l.x_0> <desired_l.x_1> ... <desired_l.x_m>                       *
+****************************************************************************
+
+  Where n is the dimension of your features, m the dimension of your
+  desired outputs and l the total number of samples that you want to
+  learn from.
+
+  Note that the corresponding output to 'feature_i' is 'desired_i'.
+
+  for example:
+
+******************************* data.nbox **********************************
+*1 0.3 0.4e10                                                              *
+*3 4                                                                       *
+*2 1 0.1e2                                                                 *
+*0 1                                                                       *
+****************************************************************************
+
+  here n = 3, m = 2 and l = 2
+
+4 Generate a neural map that fits your problem. For instance, here's how
+  to generate a triple layer network with 20 hidden neurons in the middle
+  layer, 3 inpus and 2 outputs:
+
+  $>./makemap 3 20 2 > map.nm
+
+  Here's a 5-layer network with 4 inputs and 6 outputs:
+
+  $>./makemap 4 2 31 45 6 > map.nm
+
+  Note: You need to redirect the output of the script into a .nm file. This
+  file allows NBOX to build your neural network as you wanted it.
+
+5 Create a file that you will name "learning.config" in wich you will
+  write the following:
+
+*************************** learning.config ********************************
+* WEIGHT_FILE=<the file in wich you want to save the trained ANN>          *
+* DATA_FILE=<the file containing your data, here 'data.nbox'>              *
+* NEURAL_MAP=<the generated neural map file, here 'map.nm'>                *
+* NBITERATIONS=<the number of iterations you want to perform, for ex: 200> *
+****************************************************************************
+
+6 You're all set now! To launch the training session, simply proceed with the
+  following command:
+
+  $>make learn
+
+  Note that you will have to build the nbox library before, go in the nbox
+  root directory and simply run 'make'.
+
+7 Me gusta

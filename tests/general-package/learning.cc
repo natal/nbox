@@ -11,7 +11,6 @@
 #include <cstring>
 #include <exception>
 
-#define MAX_ITER 10000
 #define MAX_MSG_LENGTH 1000
 #define THRESHOLD(val) (val >= 0.5 ? 1. : 0.)
 #define MIN(a,b) (a > b ? b : a)
