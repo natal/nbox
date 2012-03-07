@@ -34,7 +34,7 @@ class OptionErrorException: public std::exception
 static void check_opt (int argc, char** argv)
 {
     std::stringstream sstream;
-    if (argc < 4 || (argv[1][0] != '-' && argv[1][1] != 'i'))
+    if (argc < 5 || (argv[1][0] != '-' && argv[1][1] != 'i'))
     {
         sstream << "Usage: ./learn [-iX] [data_file]"
                 << " [neural_map_file] [weight_output_file]"
@@ -177,6 +177,7 @@ int main (int argc, char** argv)
                     inputs[component] = cur_val;
                 else
                     labels[component] = cur_val;
+                component++;
                 if (component >= vec_size[io])
                 {
                     // if we've just finished to load an output,

@@ -29,10 +29,10 @@ class OptionErrorException: public std::exception
         char msg_[MAX_MSG_LENGTH];
 };
 
-static void check_opt (int argc, char** argv)
+static void check_opt (int argc)
 {
     std::stringstream sstream;
-    if (argc < 3 || (argv[1][0] != '-' && argv[1][1] != 'i'))
+    if (argc < 4)
     {
         sstream << "Usage: ./test [test_data_file]"
             << " [neural_map_file] [weight_output_file]"
@@ -83,6 +83,19 @@ static double sqme (double* a,
     return length;
 }
 
+static void print_vects (double* a,
+                         double* b,
+                         size_t al,
+                         size_t bl)
+{
+    for (size_t i = 0; i < al - 1; i++)
+        std::cout << a[i] << " ";
+    std::cout << a[al - 1] << std::endl;
+    for (size_t i = 0; i < bl - 1; i++)
+        std::cout << b[i] << " ";
+    std::cout << b[bl - 1] << std::endl;
+}
+
 int main (int argc, char** argv)
 {
 
@@ -94,7 +107,7 @@ int main (int argc, char** argv)
     std::cout << std::endl;
     try
     {
-        check_opt (argc, argv);
+        check_opt (argc);
 
         std::ifstream fs_data;
         fs_data.open (argv[1]);
@@ -149,6 +162,7 @@ int main (int argc, char** argv)
                 inputs[component] = cur_val;
             else
                 labels[component] = cur_val;
+            component++;
             if (component >= vec_size[io])
             {
                 // if we've just finished to load an output,
@@ -157,6 +171,7 @@ int main (int argc, char** argv)
                 {
                     network->interpolate (outputs, inputs);
                     square_mean_err += sqme (labels, outputs, ocount);
+                    print_vects (outputs, inputs, ocount, icount);
                     eff_nb_data++;
                     nb_samples--;
                 }
