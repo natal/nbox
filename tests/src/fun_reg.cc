@@ -91,6 +91,7 @@ int main (int argc, char** argv)
             }
 
             acc_err /= 101.;
+            std::cout << "SME : " << acc_err << std::endl;
             fs_plot_err << iter << " " << acc_err << std::endl;
             network->adjust_rate (delta);
 

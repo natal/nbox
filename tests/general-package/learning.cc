@@ -16,6 +16,19 @@
 
 using namespace nbx;
 
+static double sqme (double* a,
+                    double* b,
+                    size_t l)
+{
+    double length = 0;
+    for (size_t i = 0; i < l; i++)
+    {
+        double diff = b[i] - a[i];
+        length += diff * diff;
+    }
+    return length;
+}
+
 class OptionErrorException: public std::exception
 {
     public:
@@ -151,6 +164,7 @@ int main (int argc, char** argv)
 
         double* inputs = new double[icount];
         double* labels = new double[ocount];
+        double* outputs = new double[ocount];
 
 
         std::cout << "Learning from " << max_samples
@@ -168,9 +182,10 @@ int main (int argc, char** argv)
             size_t component = 0;
             size_t eff_nb_data = 0.;
             unsigned nb_samples = max_samples;
-            size_t old_progress = -1;
+            //size_t old_progress = -1;
             size_t vec_size[2] = {icount, ocount};
             int io = 0;
+            double acc_err = 0;
 
             while (fs_data >> cur_val && nb_samples > 0)
             {
@@ -186,13 +201,16 @@ int main (int argc, char** argv)
                     if (io)
                     {
                         network->train_bp (labels, inputs);
+                        network->interpolate (outputs, inputs);
+                        acc_err += sqme (labels, outputs, ocount);
                         eff_nb_data++;
                         nb_samples--;
                     }
                     // reinitialisation of vector
                     component = 0;
                     io = !io;
-                    network->adjust_rate (delta_rate);
+
+                    /*
                     // progress displaying
                     size_t progress = eff_nb_data * 100.;
                     progress = floor ((double)progress / (double)max_samples);
@@ -203,12 +221,17 @@ int main (int argc, char** argv)
                                   << max_epochs << std::endl;
                         old_progress = progress;
                     }
+                    */
                 }
             }
+            network->adjust_rate (delta_rate);
+
+            acc_err /= (double)eff_nb_data;
 
             std::cout << "Effectively learned from "
-                << eff_nb_data << " samples"
-                << std::endl;
+                      << eff_nb_data << " samples"
+                      << std::endl;
+            std::cout << "Square mean error : " << acc_err << std::endl;
 
             std::cout << (size_t)epoch * 100. / (double)max_epochs
                       << "% epoch done" << std::endl;
@@ -221,6 +244,10 @@ int main (int argc, char** argv)
                               corrupted during training" << std::endl;
                 return 1;
             }
+            double dumb = 0;
+            fs_data >> dumb;
+            fs_data >> dumb;
+            fs_data >> dumb;
         }
 
         std::cout << "Saving weight ouput file..." << std::endl;
@@ -232,6 +259,7 @@ int main (int argc, char** argv)
 
         fs_data.close ();
         delete[] inputs;
+        delete[] outputs;
         delete[] labels;
 
     }

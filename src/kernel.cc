@@ -48,7 +48,7 @@ double nbx::Kernel::d_sigmoid_ (double x)
 double nbx::Kernel::d_tanh_ (double x)
 {
   double htan_x = tanh (x);
-  return (1 - htan_x * htan_x);
+  return (1. - htan_x * htan_x);
 }
 
 nbx::Kernel::Kernel (const std::string& func_name)
