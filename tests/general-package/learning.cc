@@ -1,6 +1,5 @@
 #include <iostream>
 #include "../../src/headers/network.hh"
-#include "../../src/headers/activ_fun.hh"
 #include "../../src/headers/exceptions.hh"
 #include "../../src/headers/parser.hh"
 #include <fstream>
@@ -14,6 +13,8 @@
 #define MAX_MSG_LENGTH 1000
 #define THRESHOLD(val) (val >= 0.5 ? 1. : 0.)
 #define MIN(a,b) (a > b ? b : a)
+
+using namespace nbx;
 
 class OptionErrorException: public std::exception
 {
@@ -141,7 +142,7 @@ int main (int argc, char** argv)
         // Network building
 
         parser.parse_file (argv[3]);
-        Network* network = parser.retrieve_network ();
+        Network* network = parser.build_network (1., "sigmoid");
 
         size_t icount = network->inputs_count ();
         size_t ocount = network->outputs_count ();
@@ -159,7 +160,7 @@ int main (int argc, char** argv)
 
 
         size_t max_epochs = get_nb_epochs (argv[1]);
-        double delta_rate = 1. / (2. * (double)(max_epochs * max_samples));
+        double delta_rate = 1. / (2. * (double)(max_epochs));
 
         for (size_t epoch = 0; epoch < max_epochs; epoch++)
         {

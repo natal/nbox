@@ -21,47 +21,53 @@
 
 #include "headers/network.hh"
 
-Network::Network ()
+nbx::Network::Network ()
   : perceptrons_ (),
     synapses_ (),
     inputs_ (),
     outputs_ (),
-    learning_rate_ (1.)
+    learning_rate_ (1.),
+    kernel_ (0)
 {
+    kernel_ = new Kernel ("sigmoid");
 }
 
-Network::Network (std::vector<unsigned>& first_layer, neuralMap& neural_map)
+nbx::Network::Network (std::vector<unsigned>& first_layer, neuralMap& neural_map)
   : perceptrons_ (),
     synapses_ (),
     inputs_ (),
     outputs_ (),
-    learning_rate_ (1.)
+    learning_rate_ (1.),
+    kernel_ (0)
 {
+    kernel_ = new Kernel ("sigmoid");
   this->initialize_network_ (first_layer, neural_map);
 }
 
-Network::Network (std::vector<unsigned>& first_layer,
-                  neuralMap& neural_map,
-                  double learning_rate)
+nbx::Network::Network (std::vector<unsigned>& first_layer,
+                       neuralMap& neural_map,
+                       double learning_rate,
+                       const std::string& kernel_name)
   : perceptrons_ (),
     inputs_ (),
     outputs_ (),
     learning_rate_ (learning_rate)
 {
+  kernel_ = new Kernel (kernel_name);
   this->initialize_network_ (first_layer, neural_map);
 }
 
-Network::~Network ()
+nbx::Network::~Network ()
 {
   std::vector<Perceptron*>::iterator it = perceptrons_.begin ();
-
   for (; it != perceptrons_.end (); it++)
     delete *it;
+  delete kernel_;
   perceptrons_.clear ();
 }
 
-void Network::initialize_network_ (std::vector<unsigned>& first_layer,
-                                   neuralMap& neural_map)
+void nbx::Network::initialize_network_ (std::vector<unsigned>& first_layer,
+                                        neuralMap& neural_map)
 {
   // Inputs creation
   std::vector<unsigned>::iterator it_fl = first_layer.begin ();
@@ -70,7 +76,7 @@ void Network::initialize_network_ (std::vector<unsigned>& first_layer,
   srand (time (NULL));
 
   for (size_t i = 0; i < nb_perceptrons; i++)
-    perceptrons_.push_back (new Perceptron (i, learning_rate_));
+    perceptrons_.push_back (new Perceptron (i, learning_rate_, kernel_));
 
   for (; it_fl != first_layer.end (); it_fl++)
     inputs_.push_back (perceptrons_[*it_fl]);
@@ -81,7 +87,7 @@ void Network::initialize_network_ (std::vector<unsigned>& first_layer,
   unmark_network_ ();
 }
 
-void Network::unmark_network_ ()
+void nbx::Network::unmark_network_ ()
 {
   std::vector<Perceptron*>::iterator it_pn = perceptrons_.begin ();
   for (; it_pn != perceptrons_.end (); it_pn++)
@@ -89,7 +95,7 @@ void Network::unmark_network_ ()
 }
 
 // recursive perceptron building (deep-first traversal of the neural map)
-void Network::build_perceptron_ (neuralMap& neural_map,
+void nbx::Network::build_perceptron_ (neuralMap& neural_map,
                                  unsigned cur_idx,
                                  Perceptron* cur)
 {
@@ -127,7 +133,7 @@ void Network::build_perceptron_ (neuralMap& neural_map,
   }
 }
 
-void Network::interpolate (double* outputs, const double* inputs)
+void nbx::Network::interpolate (double* outputs, const double* inputs)
 {
   const double* in_ptr = inputs;
   std::vector<Perceptron*>::iterator in_it = inputs_.begin ();
@@ -135,7 +141,7 @@ void Network::interpolate (double* outputs, const double* inputs)
 
   unmark_network_ ();
 
-  /************** SMART STUFF HAPPENS HERE ************************************/
+  /************** EVALUATION HAPPENS HERE ***********************************/
   /**/                                                                      /**/
   /*    Neuron activation : width-first activation of the network             */
   /**/ for (; in_it != inputs_.end (); in_it++, in_ptr++)                   /**/
@@ -156,102 +162,7 @@ void Network::interpolate (double* outputs, const double* inputs)
     *out_ptr = (*out_it)->measure_av ();
 }
 
-void Network::train (const double* error)
-{
-    const double* err_ptr = error;
-
-    std::queue<Perceptron*> e_queue; // queue used for error propagation
-    std::queue<Perceptron*> w_queue; // queue used for weight adjustment
-
-    unmark_network_ ();
-
-    /****************  ERROR BACKPROPAGATION  **********************************/
-    std::vector<Perceptron*>::iterator out_it = outputs_.begin ();
-    for (; out_it != outputs_.end(); out_it++, err_ptr++)
-        (*out_it)->propagate_err (e_queue, *err_ptr);
-
-    // Backpropagate error using a width-first traversal of the
-    // neural map
-    while (!e_queue.empty ())
-    {
-        Perceptron* front = e_queue.front ();
-        e_queue.pop ();
-        front->propagate_err (e_queue);
-    }
-
-    unmark_network_ ();
-
-    /****************  WEIGHT ADJUSTMENTS  *************************************/
-    std::vector<Perceptron*>::iterator in_it = inputs_.begin ();
-
-    for (in_it = inputs_.begin (); in_it != inputs_.end (); in_it++)
-        w_queue.push (*in_it);
-
-    // weight adjustments requires a width-first traversal of the map
-    // A queue is used for that
-
-    while (!w_queue.empty ())
-    {
-        Perceptron* front = w_queue.front ();
-        w_queue.pop ();
-        front->adjust_weights (w_queue);
-    }
-}
-
-void Network::train (double* desired_outputs, const double* inputs)
-{
-  double* outputs = new double[outputs_.size ()];
-  double* out_ptr = outputs;
-  double* des_ptr = desired_outputs;
-
-  interpolate (outputs, inputs);
-
-  std::queue<Perceptron*> e_queue; // queue used for error propagation
-  std::queue<Perceptron*> w_queue; // queue used for weight adjustment
-
-  unmark_network_ ();
-
-  /****************  ERROR BACKPROPAGATION  **********************************/
-  /**/std::vector<Perceptron*>::iterator out_it = outputs_.begin ();
-  /**/for (; out_it != outputs_.end(); out_it++, des_ptr++, out_ptr++)
-  /**/{
-  /**/   double local_err = *des_ptr - *out_ptr;
-  /**/   (*out_it)->propagate_err (e_queue, local_err);
-  /**/}
-  /**/ // Backpropagate error using a width-first traversal of the
-  /**/ // neural map
-  /**/while (!e_queue.empty ())
-  /**/{
-  /**/   Perceptron* front = e_queue.front ();
-  /**/   e_queue.pop ();
-  /**/   front->propagate_err (e_queue);
-  /**/}
-  /**/
-  /***************************************************************************/
-
-  unmark_network_ ();
-
-  /****************  WEIGHT ADJUSTMENTS  *************************************/
-  /**/std::vector<Perceptron*>::iterator in_it = inputs_.begin ();
-  /**/
-  /**/for (in_it = inputs_.begin (); in_it != inputs_.end (); in_it++)
-  /**/   w_queue.push (*in_it);
-  /**/
-  /**/ // weight adjustments requires a width-first traversal of the map
-  /**/ // A queue is used for that
-  /**/
-  /**/while (!w_queue.empty ())
-  /**/{
-  /**/   Perceptron* front = w_queue.front ();
-  /**/   w_queue.pop ();
-  /**/   front->adjust_weights (w_queue);
-  /**/}
-  /***************************************************************************/
-
-  delete[] outputs;
-}
-
-void Network::train_bp (double* desired_outputs, const double* inputs)
+void nbx::Network::train_bp (double* desired_outputs, const double* inputs)
 {
     double* outputs = new double[outputs_.size ()];
     double* out_ptr = outputs;
@@ -281,21 +192,21 @@ void Network::train_bp (double* desired_outputs, const double* inputs)
  /***************************************************************************/
 }
 
-void Network::dotify (std::ofstream& fs)
+void nbx::Network::dotify (std::ofstream& fs)
 {
   std::vector<Perceptron*>::iterator it = perceptrons_.begin ();
   for (; it != perceptrons_.end (); it++)
     (*it)->dotify (fs);
 }
 
-void Network::dotify_back (std::ofstream& fs)
+void nbx::Network::dotify_back (std::ofstream& fs)
 {
   std::vector<Perceptron*>::iterator it = perceptrons_.begin ();
   for (; it != perceptrons_.end (); it++)
     (*it)->dotify_back (fs);
 }
 
-void Network::dotify (const char* file)
+void nbx::Network::dotify (const char* file)
 {
     std::ofstream fs;
     fs.precision(7);
@@ -310,7 +221,7 @@ void Network::dotify (const char* file)
     fs.close ();
 }
 
-void Network::dotify_back (const char* file)
+void nbx::Network::dotify_back (const char* file)
 {
     std::ofstream fs;
     fs.precision(7);
@@ -325,7 +236,7 @@ void Network::dotify_back (const char* file)
     fs.close ();
 }
 
-void Network::save_weights (const char* file)
+void nbx::Network::save_weights (const char* file)
 {
     std::ofstream fs;
     fs.open (file);
@@ -341,27 +252,27 @@ void Network::save_weights (const char* file)
     fs.close ();
 }
 
-void Network::learning_rate_set (double lr)
+void nbx::Network::learning_rate_set (double lr)
 {
   learning_rate_ = lr;
 }
 
-double Network::learning_rate_get ()
+double nbx::Network::learning_rate_get ()
 {
   return learning_rate_;
 }
 
-size_t Network::inputs_count ()
+size_t nbx::Network::inputs_count ()
 {
   return inputs_.size ();
 }
 
-size_t Network::outputs_count ()
+size_t nbx::Network::outputs_count ()
 {
   return outputs_.size ();
 }
 
-void Network::adjust_rate (double delta)
+void nbx::Network::adjust_rate (double delta)
 {
     learning_rate_ -= delta;
     std::vector<Perceptron*>::iterator it = perceptrons_.begin ();
@@ -369,7 +280,7 @@ void Network::adjust_rate (double delta)
         (*it)->adjust_rate (delta);
 }
 
-void Network::weight_set (unsigned p1, unsigned p2, double val)
+void nbx::Network::weight_set (unsigned p1, unsigned p2, double val)
 {
     synapse s (p1, p2);
     Perceptron::axon* a = synapses_[s];

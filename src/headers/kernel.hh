@@ -20,23 +20,42 @@
 
 
 /*
-** file: activ_fun.hh
+** file: kernel.hh
 ** author: benjamin
 ** created on 18/02/12 at 21:04
 */
 
-#ifndef BASIS_FUN_HH_
-# define BASIS_FUN_HH_
+#ifndef KERNEL_HH_
+# define KERNEL_HH_
 # include <cmath>
 # include <iostream>
 # include <cassert>
+# include <map>
+# include <string>
 
-typedef double (*function) (double);
-typedef double (*derivative) (double);
+namespace nbx
+{
+    class Kernel
+    {
+        public:
+            typedef double (*function) (double);
+            typedef double (*derivative) (double);
+            Kernel (const std::string& func_name);
+            Kernel (function fun, derivative der);
+            double eval (double x);
+            double eval_d (double x);
 
-double sigmoid (double x);
-double d_sigmoid (double x);
-double d_tanh (double x);
-double identity (double x);
+        private:
+            typedef std::pair<function, derivative> fun_der;
+            typedef std::pair<const std::string, fun_der> fun_label;
+            static double sigmoid_ (double x);
+            static double d_sigmoid_ (double x);
+            static double d_tanh_ (double x);
+            void init_map_fun_ ();
+            std::map<const std::string, fun_der> map_fun_;
+            function fun_;
+            derivative der_;
+    };
+}
 
-#endif /* !BASIS_FUN_HH_ */
+#endif /* !KERNEL_HH_*/

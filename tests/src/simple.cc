@@ -23,12 +23,13 @@
 
 #include <iostream>
 #include "../../src/headers/network.hh"
-#include "../../src/headers/activ_fun.hh"
 #include "../../src/headers/exceptions.hh"
 #include "../../src/headers/parser.hh"
 #include <fstream>
 #include <string>
 #include <stack>
+
+using namespace nbx;
 
 int main (int argc, char** argv)
 {
@@ -41,9 +42,9 @@ int main (int argc, char** argv)
     try
     {
         parser.parse_file (argv[1]);
-        Network* network = parser.retrieve_network ();
+        Network* network = parser.build_network (1., "sigmoid");
         WeightParser wp (network);
-        wp.load_weights ("weights.wt");
+        // wp.load_weights ("weights.wt");
 
 
 
@@ -82,7 +83,7 @@ int main (int argc, char** argv)
                     std::cout << "Enter desired output no " << opt << std::endl;
                     std::cin >> outputs[opt];
                 }
-                network->train(outputs, inputs);
+                network->train_bp (outputs, inputs);
             }
         }
 
@@ -104,7 +105,7 @@ int main (int argc, char** argv)
             fs << "}" << std::endl;
             fs.close ();
         }
-        network->save_weights ("weights.wt");
+        //network->save_weights ("weights.wt");
         delete[] inputs;
         delete[] outputs;
     }

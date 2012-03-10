@@ -24,12 +24,13 @@
 
 #include <iostream>
 #include "../../src/headers/network.hh"
-#include "../../src/headers/activ_fun.hh"
 #include "../../src/headers/exceptions.hh"
 #include "../../src/headers/parser.hh"
 #include <fstream>
 #include <string>
 #include <stack>
+
+using namespace nbx;
 
 double paraboloid (double x)
 {
@@ -50,7 +51,7 @@ int main (int argc, char** argv)
     try
     {
         parser.parse_file (argv[1]);
-        Network* network = parser.retrieve_network ();
+        Network* network = parser.build_network (1., "sigmoid");
         std::ofstream fs_plot_err;
         std::ofstream fs_plot_res;
         std::ofstream fs_plot_fun;

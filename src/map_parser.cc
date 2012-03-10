@@ -22,17 +22,17 @@
 #include "headers/parser.hh"
 
 
-MapParser::MapParser ()
+nbx::MapParser::MapParser ()
 {
-  tk_info[0] = TkInfo (&MapParser::parse_input_, "input");
-  tk_info[1] = TkInfo (&MapParser::parse_neuron_, "neuron");
+  tk_info[0] = TkInfo (&nbx::MapParser::parse_input_, "input");
+  tk_info[1] = TkInfo (&nbx::MapParser::parse_neuron_, "neuron");
 }
 
-MapParser::~MapParser ()
+nbx::MapParser::~MapParser ()
 {
 }
 
-void MapParser::parse_file (const char* file)
+void nbx::MapParser::parse_file (const char* file)
 {
   std::ifstream filestream;
   filestream.open (file);
@@ -43,20 +43,24 @@ void MapParser::parse_file (const char* file)
     next_command_ (line.c_str (), line.length ());
 }
 
-Network* MapParser::retrieve_network ()
+nbx::Network* nbx::MapParser::build_network (double init_eta,
+                                             const std::string& kern)
 {
-  Network* network = new Network (first_layer_, neural_map_);
+  Network* network = new Network (first_layer_,
+                                  neural_map_,
+                                  init_eta,
+                                  kern);
   return network;
 }
 
-char MapParser::to_lower_ (char c)
+char nbx::MapParser::to_lower_ (char c)
 {
   if (c >= 'A' && c <= 'Z')
     return c + ('a' - 'A');
   return c;
 }
 
-void MapParser::parse_neuron_ (const char* line)
+void nbx::MapParser::parse_neuron_ (const char* line)
 {
   std::stringstream sstream (std::stringstream::in | std::stringstream::out);
 
@@ -70,13 +74,13 @@ void MapParser::parse_neuron_ (const char* line)
     cur_neuron->push_back (next);
 }
 
-void MapParser::parse_input_ (const char* line)
+void nbx::MapParser::parse_input_ (const char* line)
 {
   first_layer_.push_back (neural_map_.size ());
   parse_neuron_ (line);
 }
 
-void MapParser::next_command_ (const char* line, size_t size)
+void nbx::MapParser::next_command_ (const char* line, size_t size)
 {
   size_t i = 0;
 

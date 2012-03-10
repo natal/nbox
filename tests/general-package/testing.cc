@@ -1,6 +1,5 @@
 #include <iostream>
 #include "../../src/headers/network.hh"
-#include "../../src/headers/activ_fun.hh"
 #include "../../src/headers/exceptions.hh"
 #include "../../src/headers/parser.hh"
 #include <fstream>
@@ -12,6 +11,8 @@
 #define MAX_MSG_LENGTH 1000
 #define THRESHOLD(val) (val >= 0.5 ? 1. : 0.)
 #define MIN(a,b) (a > b ? b : a)
+
+using namespace nbx;
 
 class OptionErrorException: public std::exception
 {
@@ -90,7 +91,7 @@ static void print_vects (double* a,
 {
     for (size_t i = 0; i < al - 1; i++)
         std::cout << a[i] << " ";
-    std::cout << a[al - 1] << std::endl;
+    std::cout << a[al - 1] << " ";
     for (size_t i = 0; i < bl - 1; i++)
         std::cout << b[i] << " ";
     std::cout << b[bl - 1] << std::endl;
@@ -128,7 +129,7 @@ int main (int argc, char** argv)
         // Network building
 
         parser.parse_file (argv[2]);
-        Network* network = parser.retrieve_network ();
+        Network* network = parser.build_network (1., "sigmoid");
 
         size_t icount = network->inputs_count ();
         size_t ocount = network->outputs_count ();
@@ -171,7 +172,7 @@ int main (int argc, char** argv)
                 {
                     network->interpolate (outputs, inputs);
                     square_mean_err += sqme (labels, outputs, ocount);
-                    print_vects (outputs, inputs, ocount, icount);
+                    print_vects (inputs, outputs, icount, ocount);
                     eff_nb_data++;
                     nb_samples--;
                 }

@@ -19,16 +19,12 @@
    If not, see <http://www.gnu.org/licenses/>.  */
 
 
-#include "headers/activ_fun.hh"
+#include "headers/kernel.hh"
 
-double abs (double x)
-{
-    return x < 0 ? -x : x;
-}
-
+#define ABS(x) (x < 0 ? -x : x)
 #define MAX_X 500
 
-double sigmoid (double x)
+double nbx::Kernel::sigmoid_ (double x)
 {
   if (x > MAX_X)
       return 1;
@@ -38,9 +34,9 @@ double sigmoid (double x)
   return res;
 }
 
-double d_sigmoid (double x)
+double nbx::Kernel::d_sigmoid_ (double x)
 {
-  if (abs (x) > MAX_X)
+  if (ABS (x) > MAX_X)
       return 0;
   double exp_x = exp (x);
   double denom = (1. + exp_x);
@@ -49,13 +45,44 @@ double d_sigmoid (double x)
   return res;
 }
 
-double d_tanh (double x)
+double nbx::Kernel::d_tanh_ (double x)
 {
   double htan_x = tanh (x);
-  return 1 - htan_x * htan_x;
+  return (1 - htan_x * htan_x);
 }
 
-double identity (double x)
+nbx::Kernel::Kernel (const std::string& func_name)
 {
-  return x;
+    init_map_fun_ ();
+    fun_ = map_fun_[func_name].first;
+    der_ = map_fun_[func_name].second;
+}
+
+nbx::Kernel::Kernel (function fun, derivative der)
+    : fun_ (fun),
+      der_ (der)
+{
+}
+
+double nbx::Kernel::eval (double x)
+{
+    return fun_ (x);
+}
+
+double nbx::Kernel::eval_d (double x)
+{
+    return der_ (x);
+}
+
+void nbx::Kernel::init_map_fun_ ()
+{
+    fun_der sig_set (sigmoid_, d_sigmoid_);
+    fun_der tanh_set (tanh, d_tanh_);
+    fun_label sig_label ("sigmoid", sig_set);
+    fun_label th_label ("tanh", tanh_set);
+    fun_label ht_label ("htan", tanh_set);
+
+    map_fun_.insert (sig_label);
+    map_fun_.insert (th_label);
+    map_fun_.insert (ht_label);
 }

@@ -21,11 +21,13 @@
 
 #include "headers/perceptron.hh"
 
-Perceptron::Perceptron (int index, double learning_rate)
-  : inputs_ (),
+
+nbx::Perceptron::Perceptron (int index,
+                             double learning_rate,
+                             Kernel* kern)
+  : kernel_ (kern),
+    inputs_ (),
     outputs_ (),
-    transfer_func_ (sigmoid),
-    d_transfer_func_ (d_sigmoid),
     action_potential_ (1.),
     activation_val_ (1.),
     learning_rate_ (learning_rate),
@@ -35,24 +37,7 @@ Perceptron::Perceptron (int index, double learning_rate)
 {
 }
 
-Perceptron::Perceptron (int index,
-                        double learning_rate,
-                        function fun,
-                        derivative d_fun)
-  : inputs_ (),
-    outputs_ (),
-    transfer_func_ (fun),
-    d_transfer_func_ (d_fun),
-    action_potential_ (1.),
-    activation_val_ (1.),
-    learning_rate_ (learning_rate),
-    local_err_ (0.),
-    index_ (index),
-    marked_ (false)
-{
-}
-
-Perceptron::~Perceptron ()
+nbx::Perceptron::~Perceptron ()
 {
 
   std::vector<axon*>::iterator out_it = outputs_.begin ();
@@ -61,7 +46,7 @@ Perceptron::~Perceptron ()
   outputs_.clear ();
 }
 
-Perceptron::axon* Perceptron::connect_to (Perceptron* out)
+nbx::Perceptron::axon* nbx::Perceptron::connect_to (Perceptron* out)
 {
   // double allocation for easy destruction
 
@@ -73,12 +58,12 @@ Perceptron::axon* Perceptron::connect_to (Perceptron* out)
   return new_axon;
 }
 
-int Perceptron::index_get ()
+int nbx::Perceptron::index_get ()
 {
   return index_;
 }
 
-void Perceptron::activate (std::queue<Perceptron*>& w_queue)
+void nbx::Perceptron::activate (std::queue<Perceptron*>& w_queue)
 {
   std::vector<axon*>::iterator in_it = inputs_.begin ();
   // std::cout << "Activation of neuron " << index_ << std::endl;
@@ -94,7 +79,7 @@ void Perceptron::activate (std::queue<Perceptron*>& w_queue)
 
   // message transmission
   std::vector<axon*>::iterator out_it = outputs_.begin ();
-  activation_val_ = transfer_func_ (action_potential_);
+  activation_val_ = kernel_->eval (action_potential_);
   for (; out_it != outputs_.end (); out_it++)
   {
     (*out_it)->message_set (activation_val_);
@@ -107,7 +92,7 @@ void Perceptron::activate (std::queue<Perceptron*>& w_queue)
   }
 }
 
-void Perceptron::activate (std::queue<Perceptron*>& w_queue, double input_val)
+void nbx::Perceptron::activate (std::queue<Perceptron*>& w_queue, double input_val)
 {
   activation_val_ = input_val;
   std::vector<axon*>::iterator out_it = outputs_.begin ();
@@ -124,7 +109,7 @@ void Perceptron::activate (std::queue<Perceptron*>& w_queue, double input_val)
   }
 }
 
-void Perceptron::dotify (std::ofstream& fs)
+void nbx::Perceptron::dotify (std::ofstream& fs)
 {
   std::vector<axon*>::iterator out_it = outputs_.begin ();
   for (; out_it != outputs_.end (); out_it++)
@@ -137,7 +122,7 @@ void Perceptron::dotify (std::ofstream& fs)
   }
 }
 
-void Perceptron::dotify_back (std::ofstream& fs)
+void nbx::Perceptron::dotify_back (std::ofstream& fs)
 {
   std::vector<axon*>::iterator in_it = inputs_.begin ();
   for (; in_it != inputs_.end (); in_it++)
@@ -149,104 +134,31 @@ void Perceptron::dotify_back (std::ofstream& fs)
   }
 }
 
-bool Perceptron::is_marked ()
+bool nbx::Perceptron::is_marked ()
 {
   return marked_;
 }
 
-void Perceptron::mark ()
+void nbx::Perceptron::mark ()
 {
   marked_ = true;
 }
 
-void Perceptron::unmark ()
+void nbx::Perceptron::unmark ()
 {
   marked_ = false;
 }
 
-double Perceptron::measure_av ()
+double nbx::Perceptron::measure_av ()
 {
   return activation_val_;
 }
 
 // Backprogation operations
-void Perceptron::propagate_err (std::queue<Perceptron*>& queue)
+
+void nbx::Perceptron::backpropagate (std::queue<Perceptron*>& queue, double out_err)
 {
-  std::vector<axon*>::iterator out_it = outputs_.begin ();
-  local_err_ = 0.;
-  // std::cout << "Local error in neuron " << index_ << std::endl;
-  for (; out_it != outputs_.end (); out_it++)
-  {
-    Perceptron* next = (*out_it)->receiver_get ();
-    local_err_ += (*out_it)->weight_get () * next->local_err_;
-  }
-  double res_d = d_transfer_func_ (action_potential_);
-  local_err_ *= res_d;
-
-  // width-first propagation
-  std::vector<axon*>::iterator in_it = inputs_.begin ();
-  for (; in_it != inputs_.end (); in_it++)
-  {
-    Perceptron* sender = (*in_it)->sender_get ();
-    if (!sender->marked_)
-     {
-       queue.push (sender);
-       sender->mark ();
-     }
-  }
-}
-
-void Perceptron::propagate_err (std::queue<Perceptron*>& queue, double out_err)
-{
-  local_err_ = out_err * d_transfer_func_ (action_potential_);
-  // width-first propagation
-  std::vector<axon*>::iterator in_it = inputs_.begin ();
-  // std::cout << "Local error in neuron " << index_ << std::endl;
-  for (; in_it != inputs_.end (); in_it++)
-  {
-    Perceptron* sender = (*in_it)->sender_get ();
-    if (!sender->marked_)
-     {
-       queue.push (sender);
-       sender->mark ();
-     }
-  }
-}
-
-void Perceptron::adjust_weights (std::queue<Perceptron*>& queue)
-{
-    // Warning: connexions exclusively dependant on bias neurons
-    // will not be adjusted
-    // example : bias  _ neuron1
-    //                |_ neuron2
-    //                |_ neuron3
-
-  // Inbound Axons adjustment
-
-  std::vector<axon*>::iterator in_it = inputs_.begin ();
-
-  double delta_weight = learning_rate_ * local_err_ * activation_val_;
-
-  // std::cout << "Weight adjusting from neuron " << index_ << std::endl;
-
-  for (; in_it != inputs_.end (); in_it++)
-    (*in_it)->weight_adjust (delta_weight) ;
-
-  std::vector<axon*>::iterator out_it = outputs_.begin ();
-  for (; out_it != outputs_.end (); out_it++)
-  {
-    Perceptron* receiver = (*out_it)->receiver_get ();
-    if (!receiver->marked_)
-    {
-      queue.push (receiver);
-      receiver->mark ();
-    }
-  }
-}
-
-void Perceptron::backpropagate (std::queue<Perceptron*>& queue, double out_err)
-{
-    local_err_ = out_err * d_transfer_func_ (action_potential_);
+    local_err_ = out_err * kernel_->eval_d (action_potential_);
     // weight adjustment
     std::vector<axon*>::iterator in_it = inputs_.begin ();
 
@@ -272,7 +184,7 @@ void Perceptron::backpropagate (std::queue<Perceptron*>& queue, double out_err)
     }
 }
 
-void Perceptron::backpropagate (std::queue<Perceptron*>& queue)
+void nbx::Perceptron::backpropagate (std::queue<Perceptron*>& queue)
 {
     std::vector<axon*>::iterator out_it = outputs_.begin ();
     local_err_ = 0.;
@@ -282,7 +194,7 @@ void Perceptron::backpropagate (std::queue<Perceptron*>& queue)
         Perceptron* next = (*out_it)->receiver_get ();
         local_err_ += (*out_it)->weight_get () * next->local_err_;
     }
-    double res_d = d_transfer_func_ (action_potential_);
+    double res_d = kernel_->eval_d (action_potential_);
     local_err_ *= res_d;
 
     // weight adjustment
@@ -310,18 +222,12 @@ void Perceptron::backpropagate (std::queue<Perceptron*>& queue)
     }
 }
 
-void Perceptron::adjust_rate (double delta)
+void nbx::Perceptron::adjust_rate (double delta)
 {
     learning_rate_ -= delta;
 }
 
-void Perceptron::local_err_set (double err)
+void nbx::Perceptron::local_err_set (double err)
 {
   local_err_ = err;
-}
-
-void Perceptron::make_linear ()
-{
-  transfer_func_ = identity;
-  d_transfer_func_ = identity;
 }

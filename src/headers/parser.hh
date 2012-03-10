@@ -20,10 +20,10 @@
 
 
 /*
-** file: parser.hh
-** author: benjamin
-** created on 29/12/11 at 07:12
-*/
+ ** file: parser.hh
+ ** author: benjamin
+ ** created on 29/12/11 at 07:12
+ */
 
 #ifndef PARSER_HH_
 # define PARSER_HH_
@@ -37,48 +37,51 @@
 
 #define NB_TOKENS 2
 
-class MapParser
+namespace nbx
 {
-  public:
-    MapParser ();
-    ~MapParser ();
-    void parse_file (const char* file);
-    Network* retrieve_network ();
-
-  private:
-    void parse_neuron_ (const char* line);
-    void parse_input_ (const char* line);
-    neuralMap neural_map_;
-    std::vector<unsigned> first_layer_;
-    char to_lower_ (char c);
-
-    typedef void (MapParser::*parse_mthd) (const char*);
-    class TkInfo
+    class MapParser
     {
-      public:
-        TkInfo ()
-          : func (0), token (0)
-        {
-        }
-        TkInfo (parse_mthd f, const char* tk)
-          : func (f), token (tk)
-        {
-        }
-        parse_mthd func;
-        const char* token;
-    };
-    void next_command_ (const char* line, size_t size);
-    TkInfo tk_info[NB_TOKENS];
-};
+        public:
+            MapParser ();
+            ~MapParser ();
+            void parse_file (const char* file);
+            Network* build_network (double init_eta, const std::string& kern);
 
-class WeightParser
-{
-    public:
-        WeightParser (Network* network);
-        void load_weights (const char* file);
-    private:
-        void parse_line_ (const char* line, size_t len, size_t line_nb);
-        Network* network_;
-};
+        private:
+            void parse_neuron_ (const char* line);
+            void parse_input_ (const char* line);
+            Network::neuralMap neural_map_;
+            std::vector<unsigned> first_layer_;
+            char to_lower_ (char c);
+
+            typedef void (MapParser::*parse_mthd) (const char*);
+            class TkInfo
+            {
+                public:
+                    TkInfo ()
+                        : func (0), token (0)
+                    {
+                    }
+                    TkInfo (parse_mthd f, const char* tk)
+                        : func (f), token (tk)
+                    {
+                    }
+                    parse_mthd func;
+                    const char* token;
+            };
+            void next_command_ (const char* line, size_t size);
+            TkInfo tk_info[NB_TOKENS];
+    };
+
+    class WeightParser
+    {
+        public:
+            WeightParser (Network* network);
+            void load_weights (const char* file);
+        private:
+            void parse_line_ (const char* line, size_t len, size_t line_nb);
+            Network* network_;
+    };
+}
 
 #endif /* !PARSER_HH_ */

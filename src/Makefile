@@ -1,7 +1,7 @@
 include ../Makefile.rules
 
 all: lib${LIB}.so
-	echo "lib${LIB}.so generated"
+	@echo "lib${LIB}.so generated"
 
 lib${LIB}.so: ${LIBOBJ}
 	${CC} ${SOFLAGS} -shared -o lib${LIB}.so ${LIBOBJ}

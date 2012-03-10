@@ -30,26 +30,29 @@
 # include <iostream>
 # include <fstream>
 
-template <typename S, typename R, typename M>
-class Channel
+namespace nbx
 {
-  public:
-    Channel (S sender, R receiver, M message);
-    Channel (S sender, R receiver, M message, double weight);
-    R receiver_get ();
-    S sender_get ();
-    M message_get ();
-    void message_set (M msg);
-    double weight_get ();
-    void weight_adjust (double delta);
-    void weight_set (double val);
+    template <typename S, typename R, typename M>
+        class Channel
+        {
+            public:
+                Channel (S sender, R receiver, M message);
+                Channel (S sender, R receiver, M message, double weight);
+                R receiver_get ();
+                S sender_get ();
+                M message_get ();
+                void message_set (M msg);
+                double weight_get ();
+                void weight_adjust (double delta);
+                void weight_set (double val);
 
-  private:
-    S sender_;
-    R receiver_;
-    double weight_;
-    M message_;
-};
+            private:
+                S sender_;
+                R receiver_;
+                double weight_;
+                M message_;
+        };
+}
 
 
 # include "channel.hxx"
