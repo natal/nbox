@@ -28,5 +28,5 @@ exec: all
 	LD_LIBRARY_PATH='../' ./${BIN} map-samples/map3.nm
 
 debug:
-	make -C src/ simple
+	make -C src/ funreg
 	LD_LIBRARY_PATH='../' gdb ./${BIN}

@@ -88,7 +88,7 @@ static void check_io_sizes (size_t file_in,
     if (!nn_out)
         throw OptionErrorException ("Syntax Error: Neural Map File, \
                                      Not a valid output size");
-    if (nn_in != file_in && nn_out != file_out)
+    if (nn_in != file_in || nn_out != file_out)
     {
         std::stringstream sstream;
         sstream << std::endl <<
@@ -182,7 +182,7 @@ int main (int argc, char** argv)
             size_t component = 0;
             size_t eff_nb_data = 0.;
             unsigned nb_samples = max_samples;
-            //size_t old_progress = -1;
+            size_t old_progress = -1;
             size_t vec_size[2] = {icount, ocount};
             int io = 0;
             double acc_err = 0;
@@ -210,7 +210,6 @@ int main (int argc, char** argv)
                     component = 0;
                     io = !io;
 
-                    /*
                     // progress displaying
                     size_t progress = eff_nb_data * 100.;
                     progress = floor ((double)progress / (double)max_samples);
@@ -221,7 +220,6 @@ int main (int argc, char** argv)
                                   << max_epochs << std::endl;
                         old_progress = progress;
                     }
-                    */
                 }
             }
             network->adjust_rate (delta_rate);

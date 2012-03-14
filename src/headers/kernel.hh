@@ -50,7 +50,8 @@ namespace nbx
             typedef std::pair<const std::string, fun_der> fun_label;
             static double sigmoid_ (double x);
             static double d_sigmoid_ (double x);
-            static double d_tanh_ (double x);
+            static double abtanh_ (double x);
+            static double d_abtanh_ (double x);
             void init_map_fun_ ();
             std::map<const std::string, fun_der> map_fun_;
             function fun_;

@@ -1,9 +1,6 @@
 
 /* Interface code for dealing with text properties.
-   Copyright (C) 2011-2012
-   Free Software Foundation, Inc.
-
-   This file is part of nbox.
+   Copyright (C) 2011-2012 Free Software Foundation, Inc.  This file is part of nbox.
 
    nbox is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -34,7 +31,7 @@ using namespace nbx;
 
 double paraboloid (double x)
 {
-    return (sin (x) + 1.) * 0.5;
+    return sin (x)* 0.5 + 0.5;
 }
 
 int main (int argc, char** argv)
@@ -52,6 +49,12 @@ int main (int argc, char** argv)
     {
         parser.parse_file (argv[1]);
         Network* network = parser.build_network (1., "sigmoid");
+
+
+        WeightParser wt(network);
+        wt.load_weights("weights2.wt");
+
+
         std::ofstream fs_plot_err;
         std::ofstream fs_plot_res;
         std::ofstream fs_plot_fun;
@@ -60,11 +63,13 @@ int main (int argc, char** argv)
         fs_plot_res.open ("res_surf.data");
         fs_plot_fun.open ("fun_surf.data");
 
-
         size_t icount = network->inputs_count ();
         size_t ocount = network->outputs_count ();
+        double* inputs = new double[icount];
+        double* outputs = new double[ocount];
 
-        if (icount != 1 && ocount != 1)
+/*
+        if (icount != 1 and ocount != 1)
         {
             std::cout << std::endl <<
                 "WARNING : the provided neural map must" <<
@@ -72,11 +77,9 @@ int main (int argc, char** argv)
             std::cout << std::endl;
         }
 
-        double* inputs = new double[icount];
-        double* outputs = new double[ocount];
 
         double nb_iter = 5000.;
-        double delta = 1. / (2 * nb_iter);
+        double delta = 0.01 / (2 * nb_iter);
         for (unsigned iter = 0; iter < nb_iter; ++iter)
         {
             double acc_err = 0.;
@@ -102,13 +105,19 @@ int main (int argc, char** argv)
                 network->train_bp (&val, inputs);
             }
         }
+        */
 
-        for (double x = -10.; x - 10. <= 0; x += 0.2f)
+        float st1 = 0;
+        float st2 = 0;
+        for (double x = -20.; x - 20. <= 0; x += 0.2f)
         {
-            inputs[0] = x;
+            inputs[0] = st1;
+            inputs[1] = st2;
             network->interpolate (outputs, inputs);
             fs_plot_res << x << " " << outputs[0] << std::endl;
             fs_plot_fun << x << " " << paraboloid (x) << std::endl;
+            st2 = st1;
+            st1 = outputs[0];
         }
 
         fs_plot_err.close ();

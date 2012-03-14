@@ -1,3 +1,14 @@
+. Remove the large testing data from git. (heavy and useless)
+. It has been observed that using the hyperbolic tangent requires
+  a very small intial learning rate (about 10 times smaller than with
+  the sigmoid). If the initial learning rate is kept to 1.0 (Like for
+  the sigmoid), the weight correction rapidly converges towards 0 leading
+  to stagnation.
+  This is probably related to the fact that the kernel function's domain
+  is larger when using the hyperbolic tangent (2.0 wide instead of 1.0).
+
+***********************************ARCHIVE******************************************
+
 . Implement parsing of a "weight" file containing the value of the weights in the
   network. This allows one to save a trained network and load it again.
   The extension will be '.wt' and the grammar will be:
@@ -7,9 +18,6 @@
        <value> := double
 . Write a general purpose program allowing one to learn any data
   from a standard file.
-
-
-***********************************ARCHIVE******************************************
 
 . The error propagation needs verification. Use the formula given in Neural networks
   by Simon Haykin.

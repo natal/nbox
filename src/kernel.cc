@@ -23,6 +23,14 @@
 
 #define ABS(x) (x < 0 ? -x : x)
 #define MAX_X 500
+/*
+#define TANH_A 1.7159
+#define TANH_B 0.666666666667
+#define TANH_AB 1.14393333
+*/
+#define TANH_A 1.
+#define TANH_B 1.
+#define TANH_AB 1.
 
 double nbx::Kernel::sigmoid_ (double x)
 {
@@ -45,10 +53,15 @@ double nbx::Kernel::d_sigmoid_ (double x)
   return res;
 }
 
-double nbx::Kernel::d_tanh_ (double x)
+double nbx::Kernel::abtanh_ (double x)
 {
-  double htan_x = tanh (x);
-  return (1. - htan_x * htan_x);
+    return TANH_A * tanh (TANH_B * x);
+}
+
+double nbx::Kernel::d_abtanh_ (double x)
+{
+  double htan_x = tanh (TANH_B * x);
+  return TANH_AB * (1. - htan_x * htan_x);
 }
 
 nbx::Kernel::Kernel (const std::string& func_name)
@@ -77,7 +90,7 @@ double nbx::Kernel::eval_d (double x)
 void nbx::Kernel::init_map_fun_ ()
 {
     fun_der sig_set (sigmoid_, d_sigmoid_);
-    fun_der tanh_set (tanh, d_tanh_);
+    fun_der tanh_set (abtanh_, d_abtanh_);
     fun_label sig_label ("sigmoid", sig_set);
     fun_label th_label ("tanh", tanh_set);
     fun_label ht_label ("htan", tanh_set);
