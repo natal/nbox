@@ -150,13 +150,21 @@ void launch_learning (Network* network, const char* music_path)
   result = system->init(32, FMOD_INIT_NORMAL, 0);
   ERRCHECK(result);
 
+
   result = system->createSound(music_path, FMOD_SOFTWARE, 0, &music);
 
-  ERRCHECK(result);
-  //result = music->setMode(FMOD_LOOP_ON);
+
   ERRCHECK(result);
 
+  result = music->setLoopCount(-1);
+  int val;
+  music->getLoopCount(&val);
+  std::cout << "Loop count : " << val<< std::endl;
+  ERRCHECK(result);
+
+
   result = system->playSound(FMOD_CHANNEL_FREE, music, 0, &channel);
+
 
   prev = time (NULL);
   cur = time (NULL);
@@ -234,7 +242,7 @@ int main (int argc, char** argv)
     check_io_sizes (HISTORY_SIZE, 1, icount, ocount);
 
 
-    std::cout << "Learning from song : " << argv[3] << std::endl;
+    std::cout << "Learning from song : " << argv[1] << std::endl;
 
     launch_learning (network, argv[1]);
 
