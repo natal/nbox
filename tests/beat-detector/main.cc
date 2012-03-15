@@ -16,11 +16,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define THRESHOLD 0.15
 #define SPECTRUM_WIDTH 512
 #define SLEEP_TIME 25
 #define HISTORY_SIZE 10
 #define MAX_ITERATIONS 5000
-#define SAMPLE_SIZE 1024
+#define SAMPLE_SIZE 8192
 #define MAX_MSG_LENGTH 2000
 #define MIN(a,b) (a < b ? a : b)
 
@@ -111,8 +112,11 @@ static void check_io_sizes (size_t file_in,
 float compute_energy (float* sp_l, float* sp_r)
 {
   float sum = 0;
+
   for (int i = 0; i < SPECTRUM_WIDTH; i++, sp_l++, sp_r++)
-    sum += (*sp_l) * (*sp_l) + (*sp_r) * (*sp_r);
+    sum += (*sp_l) * (*sp_l);
+
+  return sum;
 }
 
 void launch_learning (Network* network, const char* music_path)
@@ -181,10 +185,9 @@ void launch_learning (Network* network, const char* music_path)
   while (run)
   {
     double diff = difftime (cur, prev);
-    acc_err = 0;
     if (diff < 0.025)
     {
-      sleep (25 - (long)diff * 1000);
+      sleep (0.025 - diff);
       prev = cur;
       cur = time (NULL);
     }
@@ -202,18 +205,27 @@ void launch_learning (Network* network, const char* music_path)
     if (!song_started && eff_nb_data > HISTORY_SIZE)
       song_started = true;
 
+    eff_nb_data++;
+
     if (song_started && nb_epochs < MAX_ITERATIONS)
     {
       network->train_bp (&energy, inputs);
       network->interpolate (&output, inputs);
+
+
+      if (output > THRESHOLD)
+        std::cout << "beat" << std::endl;
+
       acc_err += sqme (&energy, &output, 1);
-      eff_nb_data++;
 
       if (eff_nb_data > SAMPLE_SIZE)
       {
         network->adjust_rate (delta_rate);
         acc_err /= (double)eff_nb_data;
         eff_nb_data = 0;
+        std::cout << acc_err << std::endl;
+        acc_err = 0;
+        nb_epochs++;
       }
     }
   }
