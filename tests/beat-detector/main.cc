@@ -21,7 +21,7 @@
 #define SLEEP_TIME 25
 #define HISTORY_SIZE 10
 #define MAX_ITERATIONS 5000
-#define SAMPLE_SIZE 8192
+#define SAMPLE_SIZE 1024
 #define MAX_MSG_LENGTH 2000
 #define MIN(a,b) (a < b ? a : b)
 
@@ -114,16 +114,19 @@ float compute_energy (float* sp_l, float* sp_r)
   float sum = 0;
 
   for (int i = 0; i < SPECTRUM_WIDTH; i++, sp_l++, sp_r++)
-    sum += (*sp_l) * (*sp_l);
+    sum += (*sp_l) * (*sp_l);// + (*sp_r) * (*sp_r);
 
-  return sum;
+  return (sum / (SPECTRUM_WIDTH ));
 }
 
 void launch_learning (Network* network, const char* music_path)
 {
   FMOD::System     *system;
   FMOD::Sound      *music;
+  FMOD::Sound      *beat;
   FMOD::Channel    *channel = 0;
+  FMOD::Channel    *channel_beat = 0;
+
   FMOD_RESULT      result;
   int              key;
   unsigned int     version;
@@ -156,6 +159,7 @@ void launch_learning (Network* network, const char* music_path)
 
 
   result = system->createSound(music_path, FMOD_SOFTWARE, 0, &music);
+  result = system->createSound("beat.wav", FMOD_SOFTWARE, 0, &beat);
 
 
   ERRCHECK(result);
@@ -163,12 +167,17 @@ void launch_learning (Network* network, const char* music_path)
   result = music->setLoopCount(-1);
   int val;
   music->getLoopCount(&val);
-  std::cout << "Loop count : " << val<< std::endl;
   ERRCHECK(result);
 
 
   result = system->playSound(FMOD_CHANNEL_FREE, music, 0, &channel);
 
+  float data[4096] = {0.};
+
+  channel->getWaveData (data, 200, 1);
+
+  for (int i = 0; i < 200; i++)
+      std::cout << data[i] << std::endl;
 
   prev = time (NULL);
   cur = time (NULL);
@@ -185,12 +194,9 @@ void launch_learning (Network* network, const char* music_path)
   while (run)
   {
     double diff = difftime (cur, prev);
-    if (diff < 0.025)
-    {
-      sleep (0.025 - diff);
-      prev = cur;
-      cur = time (NULL);
-    }
+    timespec ts = {0, 5000000};
+    nanosleep (&ts, 0);
+
 
     channel->getSpectrum (spectrum_l, SPECTRUM_WIDTH, 0,
                            FMOD_DSP_FFT_WINDOW_RECT);
@@ -199,7 +205,7 @@ void launch_learning (Network* network, const char* music_path)
 
     double energy = compute_energy (spectrum_l, spectrum_r);
 
-    for (size_t i = HISTORY_SIZE; i > 0; i--)
+    for (size_t i = HISTORY_SIZE - 1; i > 0; i--)
       inputs[i - 1] = inputs[i];
 
     if (!song_started && eff_nb_data > HISTORY_SIZE)
@@ -213,9 +219,9 @@ void launch_learning (Network* network, const char* music_path)
       network->interpolate (&output, inputs);
 
 
-      if (output > THRESHOLD)
-        std::cout << "beat" << std::endl;
-
+      //system->playSound(FMOD_CHANNEL_FREE, beat, 0, &channel_beat);
+      system->playSound(FMOD_CHANNEL_FREE, beat, 0, &channel_beat);
+      channel_beat->setVolume (output );
       acc_err += sqme (&energy, &output, 1);
 
       if (eff_nb_data > SAMPLE_SIZE)
